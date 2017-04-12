@@ -1,0 +1,108 @@
+<?php
+
+
+namespace BugTrackerBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(
+ *     name="issues",
+ *     indexes={
+ *        @ORM\Index(name="assignee_idx", columns={"assignee"}),
+ *        @ORM\Index(name="reporter_idx", columns={"reporter"}),
+ *     }
+ * )
+ */
+class Issue
+{
+    /**
+     * @ORM\Column(type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $summary;
+
+    /**
+     * @ORM\Column(type="string", length=32)
+     */
+    private $code;
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $description;
+
+    /**
+     * @ORM\Column(type="string", length=32)
+     */
+    private $type;
+
+    /**
+     * @ORM\Column(type="string", length=32)
+     */
+    private $priority;
+
+    /**
+     * @ORM\Column(type="string", length=32)
+     */
+    private $resolution;
+
+    /**
+     * @ORM\Column(type="string", length=32)
+     */
+    private $status;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $reporter;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $assignee;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="User")
+     * @ORM\JoinTable(name="collaborators_issues",
+     *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="project_id", referencedColumnName="id")}
+     *      )
+     */
+    private $collaborators;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Issue", mappedBy="parent")
+     */
+    private $children;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Issue", inversedBy="children")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
+     */
+    private $parent;
+
+    /**
+     * Many Users have One Address.
+     * @ORM\ManyToOne(targetEntity="Project")
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id")
+     */
+    private $project;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $updatedAt;
+}
