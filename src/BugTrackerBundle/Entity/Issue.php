@@ -103,6 +103,62 @@ class Issue
     private $updatedAt;
 
     /**
+     * Issue types vocabulary
+     * @return array
+     */
+    static public function getTypes()
+    {
+        return [
+            'bug' => 'Bug',
+            'subtask' =>'Subtask',
+            'task' => 'Task',
+            'strory' => 'Story'
+        ];
+    }
+
+    /**
+     * Issue priorities vocabulary
+     * @return array
+     */
+    static public function getPriorities()
+    {
+        return [
+            'minor' => 'Minor',
+            'major' => 'Major',
+            'low' => 'Low',
+            'critical' => 'Critical'
+        ];
+    }
+
+    /**
+     * Issue statuses vocabulary
+     * @return array
+     */
+    static public function getStatuses()
+    {
+        return [
+            'open' => 'Open',
+            'in_porgress' => 'In progress',
+            'closed' => 'Closed'
+        ];
+    }
+
+    /**
+     * Issue resolutions vocabulary
+     * @return array
+     */
+    static public function getResolutions()
+    {
+        return [
+            'wont_fix' => 'Won\'t fix',
+            'fix' => 'Fix',
+            'duplicate' => 'Duplicate',
+            'done' => 'Done',
+            'incomplete' =>'Incomplete'
+        ];
+    }
+
+    /**
      * Constructor
      */
     public function __construct()

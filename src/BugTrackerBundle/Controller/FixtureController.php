@@ -20,13 +20,17 @@ class FixtureController extends Controller
      */
     public function generateDataAction()
     {
-        $issueTypes = ['Bug', 'Subtask', 'Task', 'Story'];
-        $issueStatuses = ['Open', 'In progress', 'Closed'];
-        $issuePriorities = ['Minor', 'Major', 'Low', 'Critical'];
-        $issueResolutions = ['Won\'t fix', 'Fix', 'Duplicate', 'Done', 'Incomplete'];
+        $issueTypes = array_keys(Entity\Issue::getTypes());
+        $issueStatuses = array_keys(Entity\Issue::getStatuses());
+        $issuePriorities = array_keys(Entity\Issue::getPriorities());
+        $issueResolutions = array_keys(Entity\Issue::getResolutions());
+        $userRoles = [Entity\User::ADMIN_ROLE, Entity\User::MANAGER_ROLE, Entity\User::OPERATOR_ROLE];
 
         $em = $this->getDoctrine()->getManager();
+        $encoder = $this->container->get('security.password_encoder');
+
         $parentIssue = null;
+        $plainPassword = 'qwerty123';
         for ($i = 0; $i < 5; $i++) {
             $project = new Entity\Project();
             $project->setSummary('Project summary. Content: ' . uniqid())
@@ -38,11 +42,13 @@ class FixtureController extends Controller
             $users = [];
             for ($j = 0; $j < 30; $j++) {
                 $user = new Entity\User();
+                $encoded = $encoder->encodePassword($user, $plainPassword);
+                $userRole = $userRoles[rand(0, count($userRoles) - 1)];
                 $user->setEmail(uniqid() . '@oroinc.com')
                     ->setUsername(uniqid() . '_user')
                     ->setFullname(uniqid() . 'Some Doe')
-                    ->setPasswordHash(md5('qwerty123'))
-                    ->setRoles('Admin,Operator');
+                    ->setPassword($encoded)
+                    ->setRoles([$userRole]);
                 $em->persist($user);
                 $em->flush();
 

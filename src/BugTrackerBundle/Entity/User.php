@@ -3,13 +3,18 @@
 namespace BugTrackerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="BugTrackerBundle\Repository\UserRepository")
  * @ORM\Table(name="users")
  */
-class User
+class User implements UserInterface, \Serializable
 {
+    const ADMIN_ROLE = 'ROLE_ADMIN';
+    const MANAGER_ROLE = 'ROLE_MANAGER';
+    const OPERATOR_ROLE = 'ROLE_OPERATOR';
+
     /**
      * @ORM\Column(type="integer")
      * @ORM\Id
@@ -37,15 +42,19 @@ class User
      */
     private $password_hash;
 
+    private $cpassword;
+
     /**
-     * @ORM\Column(type="string", length=128)
+     * @ORM\Column(type="string", length=255)
      */
     private $roles;
+
+    private $submitErrors = [];
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -68,7 +77,7 @@ class User
     /**
      * Get email
      *
-     * @return string 
+     * @return string
      */
     public function getEmail()
     {
@@ -91,7 +100,7 @@ class User
     /**
      * Get username
      *
-     * @return string 
+     * @return string
      */
     public function getUsername()
     {
@@ -114,7 +123,7 @@ class User
     /**
      * Get fullname
      *
-     * @return string 
+     * @return string
      */
     public function getFullname()
     {
@@ -127,7 +136,7 @@ class User
      * @param string $passwordHash
      * @return User
      */
-    public function setPasswordHash($passwordHash)
+    public function setPassword($passwordHash)
     {
         $this->password_hash = $passwordHash;
 
@@ -137,11 +146,43 @@ class User
     /**
      * Get password_hash
      *
-     * @return string 
+     * @return string
      */
-    public function getPasswordHash()
+    public function getPassword()
     {
         return $this->password_hash;
+    }
+
+    /**
+     *
+     * @return User
+     */
+    public function setCpassword($cpassword)
+    {
+        $this->cpassword = $cpassword;
+
+        return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getCpassword()
+    {
+        return $this->cpassword;
+    }
+
+    /**
+     * Gets salt
+     * @return null
+     */
+    public function getSalt()
+    {
+        return null;
+    }
+
+    public function eraseCredentials()
+    {
     }
 
     /**
@@ -152,7 +193,7 @@ class User
      */
     public function setRoles($roles)
     {
-        $this->roles = $roles;
+        $this->roles = implode(',', $roles);
 
         return $this;
     }
@@ -160,10 +201,30 @@ class User
     /**
      * Get roles
      *
-     * @return string 
+     * @return string
      */
     public function getRoles()
     {
-        return $this->roles;
+        return explode(',', $this->roles);
+    }
+
+    /** @see \Serializable::serialize() */
+    public function serialize()
+    {
+        return serialize([
+            $this->id,
+            $this->username,
+            $this->password_hash
+        ]);
+    }
+
+    /** @see \Serializable::unserialize() */
+    public function unserialize($serialized)
+    {
+        list (
+            $this->id,
+            $this->username,
+            $this->password_hash
+            ) = unserialize($serialized);
     }
 }
