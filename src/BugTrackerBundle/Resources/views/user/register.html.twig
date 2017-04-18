@@ -1,0 +1,7 @@
+{% extends 'BugTrackerBundle::base.html.twig' %}
+{% block title %}Register New Operator{% endblock %}
+{% block body %}
+    {{ form_start(form, {'attr': {'id': 'registerForm'}}) }}
+    {{ form_widget(form) }}
+    {{ form_end(form) }}
+{% endblock %}

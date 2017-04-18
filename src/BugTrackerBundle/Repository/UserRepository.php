@@ -7,10 +7,13 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 use BugTrackerBundle\Entity\User;
 
 class UserRepository extends EntityRepository
 {
+    private $searchedPageSize = 20;
+
     private $encoder;
     private $submitErrors = [];
 
@@ -22,10 +25,21 @@ class UserRepository extends EntityRepository
     }
 
     /**
+     * @param $pageSize
+     * @return $this
+     */
+    public function setSearchedPageSize($pageSize)
+    {
+        $this->searchedPageSizes = $pageSize;
+
+        return $this;
+    }
+
+    /**
      * @param User $user
      * @return bool
      */
-    public function validateSubmitedUser(User$user)
+    public function validateSubmitedUser(User $user)
     {
         $this->checkEncoder();
 
@@ -53,7 +67,7 @@ class UserRepository extends EntityRepository
             ->setParameter('username', $user->getUsername())
             ->setParameter('email', $user->getEmail());
 
-        return $query->getResult(Query::HYDRATE_SINGLE_SCALAR);
+        return $query->getSingleScalarResult();
     }
 
     /**
@@ -102,6 +116,43 @@ class UserRepository extends EntityRepository
                 }
             }
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    public function getSearchedItemsByRequest(Request $request)
+    {
+        // @TODO filtering if it's needed
+        $queryBuilder = $this->createQueryBuilder('u')
+            ->orderBy('u.id', 'DESC');
+
+        $totalsQueryBuilder = clone $queryBuilder;
+        $totalItems = $totalsQueryBuilder->select('COUNT(u)')
+            ->getQuery()
+            ->getSingleScalarResult();
+        $pageSize = $this->searchedPageSize;
+        $totalPages = ceil($totalItems / $pageSize);
+
+        // limiting resulting collection
+        $page = (int)$request->query->get('page');
+        if ($page > $totalPages && $page > 0) {
+            $page = $totalPages;
+        } elseif ($page < 0 || !$page) {
+            $page = 1;
+        }
+        $offset = $pageSize * ($page - 1);
+        $query = $queryBuilder->setMaxResults($pageSize)
+            ->setFirstResult($offset)
+            ->getQuery();
+
+        return [
+            'items' => $query->getResult(),
+            'total_pages' => $totalPages,
+            'total_items' => $totalItems,
+            'current_page' => $page
+        ];
     }
 
     /**

@@ -1,0 +1,19 @@
+{% extends 'BugTrackerBundle::base.html.twig' %}
+{% block title %}Login{% endblock %}
+{% block body %}
+    {% if error %}
+        <div id="errorMessage">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+    <form id="loginForm" action="{{ path('loginPost') }}" method="post">
+        <div class="input">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="_username" value="{{ last_username }}" />
+        </div>
+        <div class="input">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="_password" />
+        </div>
+        <a class="register_link" href="{{ path('register') }}">Register</a>
+        <button type="submit">Log in</button>
+    </form>
+{% endblock %}

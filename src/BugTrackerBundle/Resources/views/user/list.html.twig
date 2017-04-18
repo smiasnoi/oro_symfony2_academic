@@ -1,0 +1,48 @@
+{% extends 'BugTrackerBundle::base.html.twig' %}
+
+{% block body %}
+    <div id="container">
+        <!-- grid content -->
+        <div id="userGridWrapper">
+            <table class="itemsGrid">
+                <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Fullname</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {%  for user in users.items %}
+                        <tr>
+                            <td>{{ user.username|e }}</td>
+                            <td>{{ user.fullname|e }}</td>
+                            <td>{{ user.email|e }}</td>
+                            <td> - </td>
+                        </tr>
+                    {%  endfor %}
+                </tbody>
+            </table>
+            <div class="navPanel">
+                <div class="position">Page {{ users.current_page }} of {{ users.total_pages }}<div>
+                <ul class="navButtons">
+                    <li class="prev-link">
+                    {% if users.prev_link %}
+                        <a href="{{ users.prev_link }}">&lt;</a>
+                    {% else %}
+                        <span class="disabled">&lt;</span>
+                    {% endif %}
+                    </li>
+                    <li class="next-link">
+                    {% if users.next_link %}
+                        <a href="{{ users.next_link }}">&gt;</a>
+                    {% else %}
+                        <span class="disabled">&gt;</span>
+                    {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

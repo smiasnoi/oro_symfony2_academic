@@ -24,7 +24,7 @@ class UserController extends Controller
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
         return $this->render(
-            'user/login.html.twig',
+            'BugTrackerBundle:user:login.html.twig',
             array(
                 'last_username' => $lastUsername,
                 'error'
@@ -69,7 +69,7 @@ class UserController extends Controller
             $userRepository->prepareAndSaveOperator($user);
 
             // auto login
-            $token = new UsernamePasswordToken($user, $user->getPassword(), "secure_area", $user->getRoles());
+            $token = new UsernamePasswordToken($user, $user->getPassword(), "secured_area", $user->getRoles());
             $securityContext = $this->container->get('security.context');
             $securityContext->setToken($token);
 
@@ -77,7 +77,7 @@ class UserController extends Controller
         }
         $userRepository->appendAdditionalErrorsToForm($form);
 
-        return $this->render('user/register.html.twig', array(
+        return $this->render('Bugtracker:user:register.html.twig', array(
             'base_dir' => realpath($this->container->getParameter('kernel.root_dir') . '/..') . DIRECTORY_SEPARATOR,
             'form' => $form->createView()
         ));
@@ -92,8 +92,26 @@ class UserController extends Controller
     public function editAction($userId)
     {
         // replace this example code with whatever you need
-        return $this->render('default/index.html.twig', array(
+        return $this->render('BugTrackerBundle:default:index.html.twig', array(
             'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..').DIRECTORY_SEPARATOR,
         ));
+    }
+
+    /**
+     * @Route("/user/list", name="users_list_view")
+     * @Method({"GET"})
+     */
+    public function listViewAction(Request $request)
+    {
+        $userRepository = $this->getDoctrine()->getRepository('BugTrackerBundle:User');
+        $result = $userRepository->getSearchedItemsByRequest($request);
+        $result['prev_link'] = $result['current_page'] > 1 ?
+            $this->generateUrl('users_list_view', ['page' => $result['current_page'] - 1]) : null;
+        $result['next_link'] = $result['current_page'] < $result['total_pages'] ?
+            $this->generateUrl('users_list_view', ['page' => $result['current_page'] + 1]) : null;
+
+        return $this->render('BugTrackerBundle:user:list.html.twig',
+            ['users' => $result]
+        );
     }
 }
