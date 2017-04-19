@@ -31,85 +31,84 @@ class FixtureController extends Controller
 
         $parentIssue = null;
         $plainPassword = 'qwerty123';
-        for ($i = 0; $i < 5; $i++) {
-            $project = new Entity\Project();
-            $project->setSummary('Project summary. Content: ' . uniqid())
-                ->setLabel('Label-' . uniqid())
-                ->setCode('PACD-' . uniqid());
-            $em->persist($project);
+
+        $project = new Entity\Project();
+        $project->setSummary('Project summary. Content: ' . uniqid())
+            ->setLabel('Label-' . uniqid())
+            ->setCode('PACD-' . uniqid());
+        $em->persist($project);
+        $em->flush();
+
+        $users = [];
+        for ($j = 0; $j < 15; $j++) {
+            $user = new Entity\User();
+            $encoded = $encoder->encodePassword($user, $plainPassword);
+            $userRole = $userRoles[rand(0, count($userRoles) - 1)];
+            $user->setEmail(uniqid() . '@oroinc.com')
+                ->setUsername(uniqid() . '_user')
+                ->setFullname(uniqid() . 'Some Doe')
+                ->setPassword($encoded)
+                ->setRoles([$userRole]);
+            $em->persist($user);
             $em->flush();
 
-            $users = [];
-            for ($j = 0; $j < 30; $j++) {
-                $user = new Entity\User();
-                $encoded = $encoder->encodePassword($user, $plainPassword);
-                $userRole = $userRoles[rand(0, count($userRoles) - 1)];
-                $user->setEmail(uniqid() . '@oroinc.com')
-                    ->setUsername(uniqid() . '_user')
-                    ->setFullname(uniqid() . 'Some Doe')
-                    ->setPassword($encoded)
-                    ->setRoles([$userRole]);
-                $em->persist($user);
-                $em->flush();
+            $users[] = $user;
 
-                $users[] = $user;
+            // adding issues
+            $issuesAmmount = rand(1, 3);
+            for ($k = 0; $k < $issuesAmmount; $k++) {
+                $issue = new Entity\Issue();
+                $issueType = $issueTypes[rand(0, count($issueTypes) - 1)];
+                $issueStatuse = $issueStatuses[rand(0, count($issueStatuses) - 1)];
+                $issuePriority = $issuePriorities[rand(0, count($issuePriorities) - 1)];
+                $issueResolution = $issueResolutions[rand(0, count($issueResolutions) - 1)];
+
+                $issue->setCode('IACD-' . uniqid())
+                    ->setSummary('Issue summary. Content: ' . uniqid())
+                    ->setDescription('Issue description. Content: ' . uniqid())
+                    ->setType($issueType)
+                    ->setStatus($issueStatuse)
+                    ->setPriority($issuePriority)
+                    ->setResolution($issueResolution)
+                    ->setAssignee($user)
+                    ->setReporter($user)
+                    ->setProject($project)
+                    ->setCreatedAt(new \DateTime())
+                    ->setUpdatedAt(new \DateTime())
+                    ->addCollaborator($user);
+
+                if ($issueType == 'subtask' && !$parentIssue) {
+                    $issueType = 'task';
+                }
+                if ($issueType == 'task') {
+                    $parentIssue = $issue;
+                }
+                if ($issueType == 'subtask') {
+                    $issue->setParent($parentIssue);
+                }
+
+                $em->persist($issue);
 
                 //adding comments
                 $commentsAmmount = rand(1, 3);
                 for ($k = 0; $k < $commentsAmmount; $k++) {
+                    $commentator = $users[rand(0, count($users) - 1)];
                     $comment = new Entity\Comment();
-                    $comment->setBody('Unique comment for user ' . $user->getFullname())
-                        ->setAuthor($user)
+                    $comment->setBody('Unique comment for user ' . $commentator->getFullname())
+                        ->setAuthor($commentator)
+                        ->setIssue($issue)
                         ->setCreatedAt(new \DateTime());
                     $em->persist($comment);
                 }
                 $em->flush();
-
-                // adding issues
-                $issuesAmmount = rand(1, 6);
-                for ($k = 0; $k < $issuesAmmount; $k++) {
-                    $issue = new Entity\Issue();
-                    $issueType = $issueTypes[rand(0, count($issueTypes) - 1)];
-                    $issueStatuse = $issueStatuses[rand(0, count($issueStatuses) - 1)];
-                    $issuePriority = $issuePriorities[rand(0, count($issuePriorities) - 1)];
-                    $issueResolution = $issueResolutions[rand(0, count($issueResolutions) - 1)];
-
-                    $issue->setCode('IACD-' . uniqid())
-                        ->setSummary('Issue summary. Content: ' . uniqid())
-                        ->setDescription('Issue description. Content: ' . uniqid())
-                        ->setType($issueType)
-                        ->setStatus($issueStatuse)
-                        ->setPriority($issuePriority)
-                        ->setResolution($issueResolution)
-                        ->setAssignee($user)
-                        ->setReporter($user)
-                        ->setCreatedAt(new \DateTime())
-                        ->setUpdatedAt(new \DateTime());
-                    $collaborators = array_slice($users, -4, rand(1, 3));
-                    foreach ($collaborators as $collaborator) {
-                        $issue->addCollaborator($collaborator);
-                    }
-
-                    if ($issueType == 'Subtask' && !$parentIssue) {
-                        $issueType = 'Task';
-                    }
-                    if ($issueType == 'Task') {
-                        $parentIssue = $issue;
-                    }
-                    if ($issueType == 'Subtask') {
-                        $issue->setParent($parentIssue);
-                    }
-
-                    $em->persist($issue);
-                }
-                $em->flush();
-            }
-
-            foreach ($users as $user) {
-                $project->addMember($user);
             }
             $em->flush();
         }
+
+        foreach ($users as $user) {
+            $project->addMember($user);
+        }
+        $em->flush();
 
         echo "Test data has been generated";
         exit;

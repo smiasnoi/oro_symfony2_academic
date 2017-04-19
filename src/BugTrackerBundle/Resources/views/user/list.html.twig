@@ -14,7 +14,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    {%  for user in users.items %}
+                    {%  for user in collection.items %}
                         <tr>
                             <td>{{ user.username|e }}</td>
                             <td>{{ user.fullname|e }}</td>
@@ -25,18 +25,18 @@
                 </tbody>
             </table>
             <div class="navPanel">
-                <div class="position">Page {{ users.current_page }} of {{ users.total_pages }}<div>
+                <div class="position">Page {{ collection.current_page }} of {{ collection.total_pages }}</div>
                 <ul class="navButtons">
                     <li class="prev-link">
-                    {% if users.prev_link %}
-                        <a href="{{ users.prev_link }}">&lt;</a>
+                    {% if collection.prev_link %}
+                        <a href="{{ collection.prev_link }}">&lt;</a>
                     {% else %}
                         <span class="disabled">&lt;</span>
                     {% endif %}
                     </li>
                     <li class="next-link">
-                    {% if users.next_link %}
-                        <a href="{{ users.next_link }}">&gt;</a>
+                    {% if collection.next_link %}
+                        <a href="{{ collection.next_link }}">&gt;</a>
                     {% else %}
                         <span class="disabled">&gt;</span>
                     {% endif %}

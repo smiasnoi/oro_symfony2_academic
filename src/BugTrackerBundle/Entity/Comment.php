@@ -29,6 +29,13 @@ class Comment
     private $body;
 
     /**
+     * Many Users have One Address.
+     * @ORM\ManyToOne(targetEntity="Issue", inversedBy="comments")
+     * @ORM\JoinColumn(name="issue_id", referencedColumnName="id")
+     */
+    private $issue;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
@@ -110,5 +117,28 @@ class Comment
     public function getAuthor()
     {
         return $this->author;
+    }
+
+    /**
+     * Set author
+     *
+     * @param \BugTrackerBundle\Entity\Issue $issue
+     * @return Issue
+     */
+    public function setIssue(\BugTrackerBundle\Entity\Issue $issue = null)
+    {
+        $this->issue = $issue;
+
+        return $this;
+    }
+
+    /**
+     * Get author
+     *
+     * @return \BugTrackerBundle\Entity\Issue
+     */
+    public function getIssue()
+    {
+        return $this->issue;
     }
 }

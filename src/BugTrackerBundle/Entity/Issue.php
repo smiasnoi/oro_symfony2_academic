@@ -7,7 +7,14 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="issues")
+ * @ORM\Table(
+ *     name="issues",
+ *     indexes={
+ *         @ORM\Index(name="status_idx", columns={"status"}),
+ *         @ORM\Index(name="type_idx", columns={"type"}),
+ *         @ORM\Index(name="resolution_idx", columns={"resolution"}),
+ *         @ORM\Index(name="priority_idx", columns={"priority"}),
+ *     })
  */
 class Issue
 {
@@ -93,6 +100,11 @@ class Issue
     private $project;
 
     /**
+     * @ORM\OneToMany(targetEntity="Comment", mappedBy="issue")
+     */
+    private $comments;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
@@ -165,6 +177,7 @@ class Issue
     {
         $this->collaborators = new \Doctrine\Common\Collections\ArrayCollection();
         $this->children = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->comments = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -438,7 +451,9 @@ class Issue
      */
     public function addCollaborator(\BugTrackerBundle\Entity\User $collaborator)
     {
-        $this->collaborators[] = $collaborator;
+        if (!$this->collaborators->contains($collaborator)) {
+            $this->collaborators[] = $collaborator;
+        }
 
         return $this;
     }
@@ -495,6 +510,41 @@ class Issue
     {
         return $this->children;
     }
+
+    /**
+     * Add comment
+     *
+     * @param \BugTrackerBundle\Entity\Comment $comment
+     * @return Issue
+     */
+    public function addComment(\BugTrackerBundle\Entity\Comment $comment)
+    {
+        $this->comments[] = $comment;
+
+        return $this;
+    }
+
+    /**
+     * Remove comment
+     *
+     * @param \BugTrackerBundle\Entity\Comment $comment
+     */
+    public function removeComment(\BugTrackerBundle\Entity\Comment $comment)
+    {
+        $this->comments->removeElement($comment);
+    }
+
+    /**
+     * Get comments
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getComments()
+    {
+        return $this->comments;
+    }
+
+    /// test another
 
     /**
      * Set parent

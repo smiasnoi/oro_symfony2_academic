@@ -7,7 +7,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass="BugTrackerBundle\Repository\UserRepository")
- * @ORM\Table(name="users")
+ * @ORM\Table(name="users", indexes={@ORM\Index(name="roles_idx", columns={"roles"})})
  */
 class User implements UserInterface, \Serializable
 {
@@ -23,12 +23,12 @@ class User implements UserInterface, \Serializable
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=32)
+     * @ORM\Column(type="string", length=32, unique=true)
      */
     private $username;
 

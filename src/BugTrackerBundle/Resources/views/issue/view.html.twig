@@ -1,0 +1,94 @@
+{% extends 'BugTrackerBundle::base.html.twig' %}
+
+{% block body %}
+    <div id="container">
+        <div id="issueWrapper">
+            <h1 class="summary">{{ issue.summary|e }}</h1>
+
+            <ul class="actions">
+                <li>Edit</li>
+                <li>Comment</li>
+                <li>Assign</li>
+                <li>Change Status</li>
+            </ul>
+
+            <div class="headedContainer">
+                <h2 class="heading">Details</h2>
+                <dl class="details">
+                    <dt>Type</dt><dd>{{ issue.type }}</dd>
+                    <dt>Priority</dt><dd>{{ issue.priority }}</dd>
+                    <dt>Status</dt><dd>{{ issue.status }}</dd>
+                    <dt>Resolution</dt><dd>{{ issue.resolution }}</dd>
+                </dl>
+            </div>
+
+            <div class="headedContainer">
+                <h2 class="heading">People</h2>
+                <dl class="people">
+                    <dt>Assignee</dt><dd>{{ issue.assignee.fullname }}</dd>
+                    <dt>Reporter</dt><dd>{{ issue.reporter.fullname }}</dd>
+                </dl>
+            </div>
+
+            <div class="headedContainer">
+                <h2 class="heading">Description</h2>
+                <p class="description">{{ issue.description }}</p>
+            </div>
+
+            <div class="headedContainer">
+                <h2>Sub-tasks</h2>
+                <ul class="subtasks">
+                    {% for sub_issue in issue.children %}
+                    <li>
+                        <a target="_blank" href="{{ path('issue_view', {'id': sub_issue.id}) }}">
+                            <span class="summary">{{ sub_issue.summary }}</span> |
+                            <span class="summary">{{ sub_issue.code }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="headedContainer">
+                <h2>Activity</h2>
+                <div class="tabsWrapper">
+                    <ul class="tabsHeading">
+                        <li class="active" data-href="issueActivityTab">Activity</li>
+                        <li data-href="issueCommentsTab">Comments</li>
+                        <li data-href="issueCommentsTab">Collaborators</li>
+                    </ul>
+                    <div class="tabsContent">
+                        <div class="active tabContent" id="issueActivityTab">
+                            <hr />
+                            Activity tab content
+                        </div>
+                        <div id="issueCommentsTab" class="tabContent">
+                            <hr />
+                            <ul class="comments">
+                            {% for comment in issue.comments %}
+                                <li>
+                                    <span class="author">{{ comment.author.fullname }}</span>
+                                    <p class="body">{{ comment.body|nl2br }}</p>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                            {{ form_start(comment_form, {'attr': {'id': 'commentForm'}}) }}
+                            {{ form_widget(comment_form) }}
+                            {{ form_end(comment_form) }}
+                        </div>
+                        <div id="issueCollaboratorsTab" class="tabContent">
+                            <hr />
+                            <ul class="collaborators">
+                            {% for collaborator in issue.collaborators %}
+                                <li>
+                                    <span class="name">{{ collaborator.fullname }}</span>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
