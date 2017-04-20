@@ -1,0 +1,51 @@
+<?php
+
+namespace BugTrackerBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(
+ *     name="comments",
+ *     indexes={
+ *         @ORM\Index(name="entity_id_idx", columns={"entity_id"}),
+ *         @ORM\Index(name="type_idx", columns={"type"}),
+ *         @ORM\Index(name="created_idx", columns={"created_at"})
+ *     })
+ */
+class Activity
+{
+    /**
+     * @ORM\Column(type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Issue")
+     * @ORM\JoinColumn(name="issue_id", referencedColumnName="id")
+     */
+    private $issue;
+
+    /**
+     * @ORM\Column(type="string", length=32)
+     */
+    private $type;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $entityId;
+
+    /**
+     * @ORM\Column(type="string", length=64)
+     */
+    private $entity;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $createdAt;
+}

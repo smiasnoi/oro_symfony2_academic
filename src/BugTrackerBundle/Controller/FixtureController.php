@@ -86,8 +86,35 @@ class FixtureController extends Controller
                 if ($issueType == 'subtask') {
                     $issue->setParent($parentIssue);
                 }
-
                 $em->persist($issue);
+                $em->flush();
+
+                // adding 'new issue' activity
+                $activity = new Entity\Activity();
+                $activity->setProject($issue->getProject())
+                    ->setEntityId($issue->getId())
+                    ->setEntity('Issue')
+                    ->setType(Entity\Activity::NEW_ISSUE_TYPE)
+                    ->setCreatedAt(new \DateTime());
+                $em->persist($activity);
+                $em->flush();
+
+                if ($issue->getStatus() != 'new') {
+                    $snappedData = [
+                        'old_status' => 'new',
+                        'status' => $issue->getStatus()
+                    ];
+                    $activity = new Entity\Activity();
+                    $activity->setIssue($issue)
+                        ->setProject($issue->getProject())
+                        ->setEntityId($issue->getId())
+                        ->setEntity('Issue')
+                        ->setSnappedData($snappedData)
+                        ->setType(Entity\Activity::NEW_ISSUE_TYPE)
+                        ->setCreatedAt(new \DateTime());
+                    $em->persist($activity);
+                    $em->flush();
+                }
 
                 //adding comments
                 $commentsAmmount = rand(1, 3);
@@ -99,8 +126,19 @@ class FixtureController extends Controller
                         ->setIssue($issue)
                         ->setCreatedAt(new \DateTime());
                     $em->persist($comment);
+                    $em->flush();
+
+                    // add 'post comment' issue activity
+                    $activity = new Entity\Activity();
+                    $activity->setIssue($issue)
+                        ->setProject($issue->getProject())
+                        ->setEntityId($comment->getId())
+                        ->setEntity('Comment')
+                        ->setType(Entity\Activity::COMMENT_POST_TYPE)
+                        ->setCreatedAt(new \DateTime());
+                    $em->persist($activity);
+                    $em->flush();
                 }
-                $em->flush();
             }
             $em->flush();
         }

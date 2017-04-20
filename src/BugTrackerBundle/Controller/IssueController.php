@@ -2,6 +2,7 @@
 
 namespace BugTrackerBundle\Controller;
 
+use BugTrackerBundle\Entity\Activity;
 use BugTrackerBundle\Entity\Comment;
 use BugTrackerBundle\Entity\Issue;
 use BugTrackerBundle\Form\Issue\CommentType;
@@ -30,13 +31,28 @@ class IssueController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // saving new comment
             $em = $this->getDoctrine()->getEntityManager();
             $comment->setCreatedAt(new \DateTime());
             $em->persist($comment);
+
+            // adding issue collaborator
             $issue->addCollaborator($author);
             $em->persist($issue);
             $em->flush();
-            $this->redirect($this->generateUrl('issue_view', ['id' => $issue->getId()]));
+
+            // adding 'post comment' project activity
+            $activity = new Activity();
+            $activity->setIssue($issue)
+                ->setProject($issue->getProject())
+                ->setEntityId($comment->getId())
+                ->setEntity('Comment')
+                ->setType(Activity::COMMENT_POST_TYPE)
+                ->setCreatedAt(new \DateTime());
+            $em->persist($activity);
+            $em->flush();
+
+            return $this->redirect($this->generateUrl('issue_view', ['id' => $issue->getId()]));
         }
 
         return $this->render(

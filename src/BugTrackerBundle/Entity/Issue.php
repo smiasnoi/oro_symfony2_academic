@@ -14,6 +14,8 @@ use Doctrine\ORM\Mapping as ORM;
  *         @ORM\Index(name="type_idx", columns={"type"}),
  *         @ORM\Index(name="resolution_idx", columns={"resolution"}),
  *         @ORM\Index(name="priority_idx", columns={"priority"}),
+ *         @ORM\Index(name="created_idx", columns={"created_at"}),
+ *         @ORM\Index(name="updated_idx", columns={"updated_at"})
  *     })
  */
 class Issue
@@ -105,6 +107,11 @@ class Issue
     private $comments;
 
     /**
+     * @ORM\OneToMany(targetEntity="Activity", mappedBy="issue")
+     */
+    private $activities;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
@@ -149,6 +156,7 @@ class Issue
     static public function getStatuses()
     {
         return [
+            'new' => 'New',
             'open' => 'Open',
             'in_porgress' => 'In progress',
             'closed' => 'Closed'
@@ -178,6 +186,7 @@ class Issue
         $this->collaborators = new \Doctrine\Common\Collections\ArrayCollection();
         $this->children = new \Doctrine\Common\Collections\ArrayCollection();
         $this->comments = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->activities = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -544,7 +553,38 @@ class Issue
         return $this->comments;
     }
 
-    /// test another
+    /**
+     * Add activity
+     *
+     * @param \BugTrackerBundle\Entity\Activity $activity
+     * @return Issue
+     */
+    public function addActivity(\BugTrackerBundle\Entity\Activity $activity)
+    {
+        $this->activities[] = $activity;
+
+        return $this;
+    }
+
+    /**
+     * Remove activity
+     *
+     * @param \BugTrackerBundle\Entity\Activity $acactivity
+     */
+    public function removeActivity(\BugTrackerBundle\Entity\Activity $acactivity)
+    {
+        $this->activities->removeElement($acactivity);
+    }
+
+    /**
+     * Get activities
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getActivities()
+    {
+        return $this->activities;
+    }
 
     /**
      * Set parent

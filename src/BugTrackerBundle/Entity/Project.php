@@ -43,11 +43,17 @@ class Project
     private $members;
 
     /**
+     * @ORM\OneToMany(targetEntity="Activity", mappedBy="project")
+     */
+    private $activities;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
         $this->members = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->activities = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -160,5 +166,38 @@ class Project
     public function getMembers()
     {
         return $this->members;
+    }
+
+    /**
+     * Add activity
+     *
+     * @param \BugTrackerBundle\Entity\Activity $activity
+     * @return Issue
+     */
+    public function addActivity(\BugTrackerBundle\Entity\Activity $activity)
+    {
+        $this->activities[] = $activity;
+
+        return $this;
+    }
+
+    /**
+     * Remove activity
+     *
+     * @param \BugTrackerBundle\Entity\Activity $acactivity
+     */
+    public function removeActivity(\BugTrackerBundle\Entity\Activity $acactivity)
+    {
+        $this->activities->removeElement($acactivity);
+    }
+
+    /**
+     * Get activities
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getActivities()
+    {
+        return $this->activities;
     }
 }
