@@ -131,7 +131,7 @@ class Issue
             'bug' => 'Bug',
             'subtask' =>'Subtask',
             'task' => 'Task',
-            'strory' => 'Story'
+            'story' => 'Story'
         ];
     }
 

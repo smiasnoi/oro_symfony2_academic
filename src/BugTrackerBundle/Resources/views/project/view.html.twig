@@ -1,0 +1,41 @@
+{% extends 'BugTrackerBundle::base.html.twig' %}
+{% import 'BugTrackerBundle:activity:macros.html.twig' as activityMacros %}
+
+{% block body %}
+    <div id="container">
+        <div id="projectWrapper">
+            <div class="headedContainer">
+                <h2 class="heading">Summary</h2>
+                <p class="description">{{ project.summary }}</p>
+            </div>
+
+            <ul class="actions">
+                <li>Edit</li>
+            </ul>
+
+            <div class="headedContainer">
+                <h2 class="heading">Details</h2>
+                <dl class="details">
+                    <dt>Label</dt><dd>{{ project.label }}</dd>
+                    <dt>Code</dt><dd>{{ project.code }}</dd>
+                </dl>
+            </div>
+
+            <div class="headedContainer">
+                <h2>Activity</h2>
+                {% if project.activities|length %}
+                <ul class="subtasks">
+                    {% for activity in project.activities %}
+                    <li>
+                        {% set targetActivityRenderer =  'render_' ~ activity.type %}
+                        {% if attribute(activityMacros, targetActivityRenderer) is defined %}
+                            {{ attribute(activityMacros, targetActivityRenderer, {'activity': activity}) }}
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

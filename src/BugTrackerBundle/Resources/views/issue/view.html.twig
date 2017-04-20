@@ -10,6 +10,11 @@
                 <li>Comment</li>
                 <li>Assign</li>
                 <li>Change Status</li>
+                {% if issue.type == 'story' %}
+                    <li>
+                        <a href="{{ path('new_story_subtask', {'id': issue.id}) }}">Create Subtask</a>
+                    </li>
+                {% endif %}
             </ul>
 
             <div class="headedContainer">
@@ -36,6 +41,7 @@
             </div>
 
             <div class="headedContainer">
+                {% if issue.children|length %}
                 <h2>Sub-tasks</h2>
                 <ul class="subtasks">
                     {% for sub_issue in issue.children %}
@@ -47,6 +53,16 @@
                     </li>
                     {% endfor %}
                 </ul>
+                {% endif %}
+                {% if issue.parent %}
+                    <h2>Parent task</h2>
+                    <p class="parentTask">
+                        <a target="_blank" href="{{ path('issue_view', {'id': issue.parent.id}) }}">
+                            <span class="summary">{{ issue.parent.summary }}</span> |
+                            <span class="summary">{{ issue.parent.code }}</span>
+                        </a>
+                    </p>
+                {% endif %}
             </div>
 
             <div class="headedContainer">
@@ -64,6 +80,7 @@
                         </div>
                         <div id="issueCommentsTab" class="tabContent">
                             <hr />
+                            {% if issue.comments|length %}
                             <ul class="comments">
                             {% for comment in issue.comments %}
                                 <li>
@@ -72,6 +89,7 @@
                                 </li>
                             {% endfor %}
                             </ul>
+                            {% endif %}
                             {{ form_start(comment_form, {'attr': {'id': 'commentForm'}}) }}
                             {{ form_widget(comment_form) }}
                             {{ form_end(comment_form) }}

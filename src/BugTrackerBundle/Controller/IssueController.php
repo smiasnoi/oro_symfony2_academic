@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class IssueController extends Controller
 {
@@ -19,7 +20,7 @@ class IssueController extends Controller
      * })
      * @Method({"GET", "POST"})
      */
-    public function viewAction(Request $request, Issue $issue, Comment $comment = null)
+    public function viewAction(Request $request, Issue $issue)
     {
         $author = $this->getUser();
 
@@ -62,5 +63,18 @@ class IssueController extends Controller
                 'comment_form' => $form->createView()
             ]
         );
+    }
+
+
+    /**
+     * @Route("/story/new/subtask/{id}", name="new_story_subtask", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method({"GET"})
+     */
+    public function createStorySubtaskAction(Issue $story)
+    {
+        // @TODO implement new issue form for storie's subtask creation
+        return new Response();
     }
 }

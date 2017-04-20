@@ -40,6 +40,12 @@ class Activity
     private $issue;
 
     /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     */
+    private $user;
+
+    /**
      * @ORM\Column(type="string", length=32)
      */
     private $type;
@@ -234,5 +240,28 @@ class Activity
     public function getSnappedData()
     {
         return $this->snappedData;
+    }
+
+    /**
+     * Set user
+     *
+     * @param \BugTrackerBundle\Entity\User $user
+     * @return Activity
+     */
+    public function setUser(\BugTrackerBundle\Entity\User $user = null)
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get issue
+     *
+     * @return \BugTrackerBundle\Entity\User
+     */
+    public function getUser()
+    {
+        return $this->user;
     }
 }

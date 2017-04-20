@@ -1,0 +1,21 @@
+{# @TODO implement correct activity renderers #}
+{% macro render_comment_post(activity) %}
+    <a class="user-link"target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
+        {{ activity.user.fullname }}
+    </a>
+    <p>Comment Post </p>
+{% endmacro %}
+
+{% macro render_new_issue(activity) %}
+    <a class="user-link"target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
+        {{ activity.user.fullname }}
+    </a>
+    <p>New Issue</p>
+{% endmacro %}
+
+{% macro render_issue_change_status(activity) %}
+    <a class="user-link"target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
+        {{ activity.user.fullname }}
+    </a>
+    <p>Issue Change Status</p>
+{% endmacro %}

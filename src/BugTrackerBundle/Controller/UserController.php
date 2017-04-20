@@ -114,12 +114,27 @@ class UserController extends Controller
     }
 
     /**
+     * @Route("/user/{id}", name="user_view", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method({"GET"})
+     */
+    public function viewAction(User $user)
+    {
+        // @TODO implement user profile representation
+        echo $user->getId(). ' | '.$user->getFullname();
+        return new Response();
+    }
+
+    /**
      * @Route("/user/edit/{userId}", name="user_edit", requirements={
      *     "userId": "\d+"
      * })
      * @Method({"GET"})
+     * @param User $user
+     * @return Response
      */
-    public function editAction($userId)
+    public function editAction(User $user)
     {
         // replace this example code with whatever you need
         return $this->render('BugTrackerBundle:default:index.html.twig', array(
