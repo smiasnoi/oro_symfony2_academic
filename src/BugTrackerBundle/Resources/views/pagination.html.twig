@@ -1,0 +1,21 @@
+{% macro renderNavPanelPattern1(collection) %}
+<div class="navPanel">
+    <div class="position">Page {{ collection.current_page }} of {{ collection.total_pages }}</div>
+    <ul class="navButtons">
+        <li class="prev-link">
+            {% if collection.prev_page_url %}
+                <a href="{{ collection.prev_page_url }}">&lt;</a>
+            {% else %}
+                <span class="disabled">&lt;</span>
+            {% endif %}
+        </li>
+        <li class="next-link">
+            {% if collection.next_page_url %}
+                <a href="{{ collection.next_page_url }}">&gt;</a>
+            {% else %}
+                <span class="disabled">&gt;</span>
+            {% endif %}
+        </li>
+    </ul>
+</div>
+{% endmacro %}

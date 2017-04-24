@@ -5,6 +5,7 @@ namespace BugTrackerBundle\Controller;
 use BugTrackerBundle\Entity\Activity;
 use BugTrackerBundle\Entity\Comment;
 use BugTrackerBundle\Entity\Issue;
+use Doctrine\Common\Collections\Criteria;
 use BugTrackerBundle\Form\Issue\CommentType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -44,10 +45,16 @@ class IssueController extends Controller
 
             // adding 'post comment' project activity
             $activity = new Activity();
+            $snappedData = [
+                'issue_code' => $issue->getCode(),
+                'comment_body' => $comment->getBody()
+            ];
             $activity->setIssue($issue)
                 ->setProject($issue->getProject())
+                ->setUser($this->getUser())
                 ->setEntityId($comment->getId())
                 ->setEntity('Comment')
+                ->setSnappedData($snappedData)
                 ->setType(Activity::COMMENT_POST_TYPE)
                 ->setCreatedAt(new \DateTime());
             $em->persist($activity);
@@ -56,10 +63,17 @@ class IssueController extends Controller
             return $this->redirect($this->generateUrl('issue_view', ['id' => $issue->getId()]));
         }
 
+        $criteria = new Criteria();
+        $criteria->orderBy(['createdAt' => Criteria::DESC]);
+        $comments = $issue->getComments()->matching($criteria);
+        $activities = $issue->getActivities()->matching($criteria);
+
         return $this->render(
             'BugTrackerBundle:issue:view.html.twig',
             [
                 'issue' => $issue,
+                'comments' => $comments,
+                'activities' => $activities,
                 'comment_form' => $form->createView()
             ]
         );

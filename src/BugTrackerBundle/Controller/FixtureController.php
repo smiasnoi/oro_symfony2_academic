@@ -91,10 +91,12 @@ class FixtureController extends Controller
 
                 // adding 'new issue' activity
                 $activity = new Entity\Activity();
+                $snappedData = ['issue_code' => $issue->getCode()];
                 $activity->setProject($issue->getProject())
                     ->setUser($user)
                     ->setEntityId($issue->getId())
                     ->setEntity('Issue')
+                    ->setSnappedData($snappedData)
                     ->setType(Entity\Activity::NEW_ISSUE_TYPE)
                     ->setCreatedAt(new \DateTime());
                 $em->persist($activity);
@@ -102,6 +104,7 @@ class FixtureController extends Controller
 
                 if ($issue->getStatus() != 'new') {
                     $snappedData = [
+                        'issue_code' => $issue->getCode(),
                         'old_status' => 'new',
                         'status' => $issue->getStatus()
                     ];
@@ -132,11 +135,17 @@ class FixtureController extends Controller
 
                     // add 'post comment' issue activity
                     $activity = new Entity\Activity();
+                    $snappedData = [
+                        'issue_code' => $issue->getCode(),
+                        'comment_body' => $comment->getBody()
+                    ];
+
                     $activity->setIssue($issue)
                         ->setUser($commentator)
                         ->setProject($issue->getProject())
                         ->setEntityId($comment->getId())
                         ->setEntity('Comment')
+                        ->setSnappedData($snappedData)
                         ->setType(Entity\Activity::COMMENT_POST_TYPE)
                         ->setCreatedAt(new \DateTime());
                     $em->persist($activity);

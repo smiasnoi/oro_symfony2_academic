@@ -2,6 +2,10 @@
 {% block title %}Register New Operator{% endblock %}
 {% block body %}
     {{ form_start(form, {'attr': {'id': 'registerForm'}}) }}
-    {{ form_widget(form) }}
+        {{ form_row(form.email) }}
+        {{ form_row(form.username) }}
+        {{ form_row(form.fullname) }}
+        {{ form_row(form.password) }}
+        {{ form_row(form.cpassword) }}
     {{ form_end(form) }}
 {% endblock %}

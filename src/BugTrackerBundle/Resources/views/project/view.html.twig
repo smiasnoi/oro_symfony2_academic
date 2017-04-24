@@ -1,5 +1,6 @@
 {% extends 'BugTrackerBundle::base.html.twig' %}
 {% import 'BugTrackerBundle:activity:macros.html.twig' as activityMacros %}
+{% import 'BugTrackerBundle::pagination.html.twig' as pagination %}
 
 {% block body %}
     <div id="container">
@@ -23,17 +24,34 @@
 
             <div class="headedContainer">
                 <h2>Activity</h2>
-                {% if project.activities|length %}
-                <ul class="subtasks">
-                    {% for activity in project.activities %}
+                {% if activities|length %}
+                <ul class="activities">
+                    {% for activity in activities.items %}
                     <li>
-                        {% set targetActivityRenderer =  'render_' ~ activity.type %}
+                        {% set targetActivityRenderer =  'render_' ~ activity.type ~ '_for_project' %}
                         {% if attribute(activityMacros, targetActivityRenderer) is defined %}
                             {{ attribute(activityMacros, targetActivityRenderer, {'activity': activity}) }}
                         {% endif %}
                     </li>
                     {% endfor %}
                 </ul>
+                {{ pagination.renderNavPanelPattern1(activities) }}
+                {% endif %}
+            </div>
+
+            <div class="headedContainer">
+                <h2>Members</h2>
+                {% if members|length %}
+                <ul class="members">
+                    {% for member in members.items %}
+                        <li>
+                            <a class="user-link"target="_blank" href="{{ path('user_view', {'id': member.id}) }}">
+                                {{ member.fullname }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+                {{ pagination.renderNavPanelPattern1(members) }}
                 {% endif %}
             </div>
         </div>

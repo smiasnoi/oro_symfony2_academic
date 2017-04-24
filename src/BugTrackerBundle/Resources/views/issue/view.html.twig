@@ -1,4 +1,5 @@
 {% extends 'BugTrackerBundle::base.html.twig' %}
+{% import 'BugTrackerBundle:activity:macros.html.twig' as activityMacros %}
 
 {% block body %}
     <div id="container">
@@ -76,13 +77,24 @@
                     <div class="tabsContent">
                         <div class="active tabContent" id="issueActivityTab">
                             <hr />
-                            Activity tab content
+                            {% if activities|length %}
+                            <ul >
+                                {% for activity in activities %}
+                                <li>
+                                    {% set targetActivityRenderer =  'render_' ~ activity.type ~ '_for_issue' %}
+                                    {% if attribute(activityMacros, targetActivityRenderer) is defined %}
+                                        {{ attribute(activityMacros, targetActivityRenderer, {'activity': activity}) }}
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
                         </div>
                         <div id="issueCommentsTab" class="tabContent">
                             <hr />
-                            {% if issue.comments|length %}
+                            {% if comments|length %}
                             <ul class="comments">
-                            {% for comment in issue.comments %}
+                            {% for comment in comments %}
                                 <li>
                                     <span class="author">{{ comment.author.fullname }}</span>
                                     <p class="body">{{ comment.body|nl2br }}</p>

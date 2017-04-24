@@ -1,0 +1,23 @@
+{% extends 'BugTrackerBundle::base.html.twig' %}
+
+{% block body %}
+    <div id="container">
+        <div id="userEditWrapper">
+            <ul class="actions">
+                {% if is_granted('ROLE_ADMIN') or (user.id == logged_user.id) %}
+                    <li><a href="{{ path('user_edit', {'id': user.id }) }}">Edit profile</a></li>
+                {% endif %}
+            </ul>
+
+            <div class="headedContainer">
+                <h2 class="heading">Details</h2>
+                <dl class="details">
+                    <dt>Username</dt><dd>{{ user.username }}</dd>
+                    <dt>Fullname</dt><dd>{{ user.fullname }}</dd>
+                    <dt>Email</dt><dd>{{ user.email }}</dd>
+                    <dt>Roles</dt><dd>{{ user.roles|join(', ') }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+{% endblock %}

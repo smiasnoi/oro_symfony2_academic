@@ -1,4 +1,5 @@
 {% extends 'BugTrackerBundle::base.html.twig' %}
+{% import 'BugTrackerBundle::pagination.html.twig' as pagination %}
 
 {% block body %}
     <div id="container">
@@ -19,30 +20,18 @@
                             <td>{{ user.username|e }}</td>
                             <td>{{ user.fullname|e }}</td>
                             <td>{{ user.email|e }}</td>
-                            <td> - </td>
+                            <td>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <a href="{{ path('user_edit', {'id': user.id}) }}">Edit</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
                         </tr>
                     {%  endfor %}
                 </tbody>
             </table>
-            <div class="navPanel">
-                <div class="position">Page {{ collection.current_page }} of {{ collection.total_pages }}</div>
-                <ul class="navButtons">
-                    <li class="prev-link">
-                    {% if collection.prev_link %}
-                        <a href="{{ collection.prev_link }}">&lt;</a>
-                    {% else %}
-                        <span class="disabled">&lt;</span>
-                    {% endif %}
-                    </li>
-                    <li class="next-link">
-                    {% if collection.next_link %}
-                        <a href="{{ collection.next_link }}">&gt;</a>
-                    {% else %}
-                        <span class="disabled">&gt;</span>
-                    {% endif %}
-                    </li>
-                </ul>
-            </div>
+            {{ pagination.renderNavPanelPattern1(collection) }}
         </div>
     </div>
 {% endblock %}

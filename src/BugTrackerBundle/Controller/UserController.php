@@ -11,9 +11,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Form\FormError;
-
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use BugTrackerBundle\Entity\User;
-use BugTrackerBundle\Form\User\RegisterType as RegisterForm;
+use BugTrackerBundle\Form\User\EditType as UserForm;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class UserController extends Controller
 {
@@ -47,7 +48,7 @@ class UserController extends Controller
 
     /**
      * @Route("/user/logout", name="logout")
-     * @Method({"get"})
+     * @Method({"GET"})
      */
     public function logoutAction()
     {
@@ -64,7 +65,8 @@ class UserController extends Controller
         $encoder = $this->container->get('security.password_encoder');
 
         $user = new User();
-        $form = $this->createForm(RegisterForm::class, $user, []);
+        $form = $this->createForm(UserForm::class, $user, []);
+        $form->add('register', SubmitType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()
@@ -78,8 +80,9 @@ class UserController extends Controller
 
             // auto login
             $token = new UsernamePasswordToken($user, $user->getPassword(), "secured_area", $user->getRoles());
-            $securityContext = $this->container->get('security.context');
-            $securityContext->setToken($token);
+            $this->get("security.context")->setToken($token);
+            $event = new InteractiveLoginEvent($request, $token);
+            $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
 
             return $this->redirectToRoute('dashboard');
         }
@@ -121,13 +124,17 @@ class UserController extends Controller
      */
     public function viewAction(User $user)
     {
-        // @TODO implement user profile representation
-        echo $user->getId(). ' | '.$user->getFullname();
-        return new Response();
+        return $this->render(
+            'BugTrackerBundle:user:view.html.twig',
+            [
+                'user' => $user,
+                'logged_user' => $this->getUser()
+            ]
+        );
     }
 
     /**
-     * @Route("/user/edit/{userId}", name="user_edit", requirements={
+     * @Route("/user/edit/{id}", name="user_edit", requirements={
      *     "userId": "\d+"
      * })
      * @Method({"GET"})
@@ -150,9 +157,9 @@ class UserController extends Controller
     {
         $userRepository = $this->getDoctrine()->getRepository('BugTrackerBundle:User');
         $collection = $userRepository->getFilteredCollection((int)$request->query->get('page'));
-        $collection['prev_link'] = $collection['current_page'] > 1 ?
+        $collection['prev_page_url'] = $collection['current_page'] > 1 ?
             $this->generateUrl('users_list_view', ['page' => $collection['current_page'] - 1]) : null;
-        $collection['next_link'] = $collection['current_page'] < $collection['total_pages'] ?
+        $collection['next_page_url'] = $collection['current_page'] < $collection['total_pages'] ?
             $this->generateUrl('users_list_view', ['page' => $collection['current_page'] + 1]) : null;
 
         return $this->render('BugTrackerBundle:user:list.html.twig',
