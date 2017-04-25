@@ -14,46 +14,61 @@
                 <li>Edit</li>
             </ul>
 
-            <div class="headedContainer">
-                <h2 class="heading">Details</h2>
-                <dl class="details">
-                    <dt>Label</dt><dd>{{ project.label }}</dd>
-                    <dt>Code</dt><dd>{{ project.code }}</dd>
-                </dl>
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Details</strong></div>
+                <div class="panel-body">
+                    <dl class="details dl-horizontal">
+                        <dt>Label</dt><dd>{{ project.label }}</dd>
+                        <dt>Code</dt><dd>{{ project.code }}</dd>
+                    </dl>
+                </div>
             </div>
 
-            <div class="headedContainer">
-                <h2>Activity</h2>
+            <div class="row">
                 {% if activities|length %}
-                <ul class="activities">
-                    {% for activity in activities.items %}
-                    <li>
-                        {% set targetActivityRenderer =  'render_' ~ activity.type ~ '_for_project' %}
-                        {% if attribute(activityMacros, targetActivityRenderer) is defined %}
-                            {{ attribute(activityMacros, targetActivityRenderer, {'activity': activity}) }}
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-                </ul>
-                {{ pagination.renderNavPanelPattern1(activities) }}
+                <div class="col-md-8">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>Activity</strong></div>
+                        <div class="panel-body">
+                            <ul class="activities list-unstyled">
+                                {% for activity in activities.items %}
+                                    {% if loop.first == false %}<hr />{% endif %}
+                                <li>
+                                    {% set targetActivityRenderer =  'render_' ~ activity.type ~ '_for_project' %}
+                                    {% if attribute(activityMacros, targetActivityRenderer) is defined %}
+                                        {{ attribute(activityMacros, targetActivityRenderer, {'activity': activity}) }}
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {{ pagination.renderNavPanelPattern1(activities) }}
+                        </div>
+                    </div>
+                </div>
                 {% endif %}
-            </div>
 
-            <div class="headedContainer">
-                <h2>Members</h2>
                 {% if members|length %}
-                <ul class="members">
-                    {% for member in members.items %}
-                        <li>
-                            <a class="user-link"target="_blank" href="{{ path('user_view', {'id': member.id}) }}">
-                                {{ member.fullname }}
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-                {{ pagination.renderNavPanelPattern1(members) }}
+                <div class="col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>Members</strong></div>
+                        <div class="panel-body">
+                            <ul class="members list-unstyled">
+                                {% for member in members.items %}
+                                    {% if loop.first == false %}<hr />{% endif %}
+                                <li>
+                                    <a class="user-link"target="_blank" href="{{ path('user_view', {'id': member.id}) }}">
+                                        {{ member.fullname }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {{ pagination.renderNavPanelPattern1(members) }}
+                        </div>
+                    </div>
+                </div>
                 {% endif %}
             </div>
         </div>
     </div>
 {% endblock %}
+

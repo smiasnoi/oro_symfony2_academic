@@ -11,7 +11,7 @@ a:hover {
     text-decoration: none;
 }
 
-#registerForm {
+#userForm {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -21,31 +21,31 @@ a:hover {
     margin: -50px 0 0 -155px;
 }
 
-#registerForm button {
+#userForm button {
     float: right;
     padding: 5px;
     font: 16px/1.2 sans-serif;
 }
 
-#registerForm > div {
+#userForm > div {
     margin-bottom: 5px;
     overflow: hidden;
 }
 
-#registerForm > div label {
+#userForm > div label {
     padding: 3px 10px 3px 0;
     float: left;
     text-align: right;
     width: 140px;
 }
 
-#registerForm .register_link {
+#userForm .register_link {
     float: left;
     padding: 15px 0 0 15px;
     font: 12px/1.2 sans-serif;
 }
 
-#registerForm > div input {
+#userForm > div input {
     float: left;
     width: 190px;
     font: 14px/1.8 sans-serif;

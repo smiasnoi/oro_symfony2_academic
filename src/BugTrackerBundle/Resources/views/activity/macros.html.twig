@@ -1,15 +1,15 @@
 {# Project page activities renderers #}
 {% macro render_comment_post_for_project(activity) %}
-    <div class="row">
-        <a class="user-link"target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
+    <div class="line">
+        <a class="user-link" target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
             {{ activity.user.fullname }}
         </a>
         commented issue
-        <a class="user-link"target="_blank" href="{{ path('issue_view', {'id': activity.entityId}) }}">
+        <a class="user-link" target="_blank" href="{{ path('issue_view', {'id': activity.entityId}) }}">
             {{ activity.snappedData.issue_code }}
         </a>
     </div>
-    <div class="row">
+    <div class="line">
         <p class="snapped-info">
             Comment summary "{{ activity.snappedData.comment_body[:50] ~ '...' }}"
         </p>
@@ -17,24 +17,24 @@
 {% endmacro %}
 
 {% macro render_new_issue_for_project(activity) %}
-    <div class="row">
-        <a class="user-link"target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
+    <div class="line">
+        <a class="user-link" target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
             {{ activity.user.fullname }}
         </a>
         created new issue
-        <a class="user-link"target="_blank" href="{{ path('issue_view', {'id': activity.entityId}) }}">
+        <a class="user-link" target="_blank" href="{{ path('issue_view', {'id': activity.entityId}) }}">
             {{ activity.snappedData.issue_code }}
         </a>
     </div>
 {% endmacro %}
 
 {% macro render_issue_change_status_for_project(activity) %}
-    <div class="row">
-        <a class="user-link"target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
+    <div class="line">
+        <a class="user-link" target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
             {{ activity.user.fullname }}
         </a>
         changed status of the issue
-        <a class="user-link"target="_blank" href="{{ path('issue_view', {'id': activity.entityId}) }}">
+        <a class="user-link" target="_blank" href="{{ path('issue_view', {'id': activity.entityId}) }}">
             {{ activity.snappedData.issue_code }}
         </a>
         from "{{ activity.snappedData.old_status }}" to "{{ activity.snappedData.status }}"
@@ -43,13 +43,13 @@
 
 {# Issue page activities renderers #}
 {% macro render_comment_post_for_issue(activity) %}
-    <div class="row">
+    <div class="line">
         <a class="user-link"target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
             {{ activity.user.fullname }}
         </a>
         left comment
     </div>
-    <div class="row">
+    <div class="line">
         <p class="snapped-info">
             "{{ activity.snappedData.comment_body[:50] ~ '...' }}"
         </p>
@@ -59,7 +59,7 @@
 {% macro render_new_issue_for_issue(activity) %}{% endmacro %}
 
 {% macro render_issue_change_status_for_issue(activity) %}
-    <div class="row">
+    <div class="line">
         <a class="user-link"target="_blank" href="{{ path('user_view', {'id': activity.user.id}) }}">
             {{ activity.user.fullname }}
         </a>

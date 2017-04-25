@@ -18,69 +18,84 @@
                 {% endif %}
             </ul>
 
-            <div class="headedContainer">
-                <h2 class="heading">Details</h2>
-                <dl class="details">
-                    <dt>Type</dt><dd>{{ issue.type }}</dd>
-                    <dt>Priority</dt><dd>{{ issue.priority }}</dd>
-                    <dt>Status</dt><dd>{{ issue.status }}</dd>
-                    <dt>Resolution</dt><dd>{{ issue.resolution }}</dd>
-                </dl>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>Details</strong></div>
+                        <div class="panel-body">
+                            <dl class="details dl-horizontal">
+                                <dt>Type</dt><dd>{{ issue.type }}</dd>
+                                <dt>Priority</dt><dd>{{ issue.priority }}</dd>
+                                <dt>Status</dt><dd>{{ issue.status }}</dd>
+                                <dt>Resolution</dt><dd>{{ issue.resolution }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>People</strong></div>
+                        <div class="panel-body">
+                            <dl class="people dl-horizontal">
+                                <dt>Assignee</dt><dd>{{ issue.assignee.fullname }}</dd>
+                                <dt>Reporter</dt><dd>{{ issue.reporter.fullname }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="headedContainer">
-                <h2 class="heading">People</h2>
-                <dl class="people">
-                    <dt>Assignee</dt><dd>{{ issue.assignee.fullname }}</dd>
-                    <dt>Reporter</dt><dd>{{ issue.reporter.fullname }}</dd>
-                </dl>
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Description</strong></div>
+                <p class="description panel-body">{{ issue.description }}</p>
             </div>
 
-            <div class="headedContainer">
-                <h2 class="heading">Description</h2>
-                <p class="description">{{ issue.description }}</p>
-            </div>
-
-            <div class="headedContainer">
-                {% if issue.children|length %}
-                <h2>Sub-tasks</h2>
-                <ul class="subtasks">
-                    {% for sub_issue in issue.children %}
-                    <li>
-                        <a target="_blank" href="{{ path('issue_view', {'id': sub_issue.id}) }}">
-                            <span class="summary">{{ sub_issue.summary }}</span> |
-                            <span class="summary">{{ sub_issue.code }}</span>
-                        </a>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-                {% if issue.parent %}
-                    <h2>Parent task</h2>
-                    <p class="parentTask">
-                        <a target="_blank" href="{{ path('issue_view', {'id': issue.parent.id}) }}">
-                            <span class="summary">{{ issue.parent.summary }}</span> |
-                            <span class="summary">{{ issue.parent.code }}</span>
-                        </a>
-                    </p>
-                {% endif %}
-            </div>
-
-            <div class="headedContainer">
-                <h2>Activity</h2>
-                <div class="tabsWrapper">
-                    <ul class="tabsHeading">
-                        <li class="active" data-href="issueActivityTab">Activity</li>
-                        <li data-href="issueCommentsTab">Comments</li>
-                        <li data-href="issueCommentsTab">Collaborators</li>
+            {% if issue.children|length %}
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Sub-tasks</strong></div>
+                <div class="panel-body">
+                    <ul class="subtasks">
+                        {% for sub_issue in issue.children %}
+                        <li>
+                            <a target="_blank" href="{{ path('issue_view', {'id': sub_issue.id}) }}">
+                                <span class="summary">{{ sub_issue.summary }}</span> |
+                                <span class="summary">{{ sub_issue.code }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
                     </ul>
-                    <div class="tabsContent">
-                        <div class="active tabContent" id="issueActivityTab">
-                            <hr />
+                </div>
+            </div>
+            {% endif %}
+
+            {% if issue.parent %}
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Parent task</strong></p>
+                <div class="parent-task panel-body">
+                    <a target="_blank" href="{{ path('issue_view', {'id': issue.parent.id}) }}">
+                        <span class="summary">{{ issue.parent.summary }}</span> |
+                        <span class="summary">{{ issue.parent.code }}</span>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Activity</strong></div>
+                <div class="panel-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#issueActivityTab">Activity</a></li>
+                        <li><a data-toggle="tab" href="#issueCommentsTab">Comments</a></li>
+                        <li><a data-toggle="tab" href="#issueCollaboratorsTab">Collaborators</a></li>
+                    </ul>
+                    <div class="tab-content panel-body">
+                        <div id="issueActivityTab" class="active tab-pane fade in">
                             {% if activities|length %}
-                            <ul >
+                            <ul class="activities list-unstyled">
                                 {% for activity in activities %}
                                 <li>
+                                    {% if loop.first == false %}<hr />{% endif %}
                                     {% set targetActivityRenderer =  'render_' ~ activity.type ~ '_for_issue' %}
                                     {% if attribute(activityMacros, targetActivityRenderer) is defined %}
                                         {{ attribute(activityMacros, targetActivityRenderer, {'activity': activity}) }}
@@ -90,12 +105,12 @@
                             </ul>
                             {% endif %}
                         </div>
-                        <div id="issueCommentsTab" class="tabContent">
-                            <hr />
+                        <div id="issueCommentsTab" class="tab-pane fade">
                             {% if comments|length %}
-                            <ul class="comments">
+                            <ul class="comments list-unstyled">
                             {% for comment in comments %}
                                 <li>
+                                    {% if loop.first == false %}<hr />{% endif %}
                                     <span class="author">{{ comment.author.fullname }}</span>
                                     <p class="body">{{ comment.body|nl2br }}</p>
                                 </li>
@@ -106,11 +121,11 @@
                             {{ form_widget(comment_form) }}
                             {{ form_end(comment_form) }}
                         </div>
-                        <div id="issueCollaboratorsTab" class="tabContent">
-                            <hr />
-                            <ul class="collaborators">
+                        <div id="issueCollaboratorsTab" class="tab-pane fade">
+                            <ul class="collaborators list-unstyled">
                             {% for collaborator in issue.collaborators %}
                                 <li>
+                                    {% if loop.first == false %}<hr />{% endif %}
                                     <span class="name">{{ collaborator.fullname }}</span>
                                 </li>
                             {% endfor %}

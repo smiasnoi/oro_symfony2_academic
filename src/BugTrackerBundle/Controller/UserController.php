@@ -18,6 +18,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class UserController extends Controller
 {
+    const SUBMITTED_USER_PASSWORD_MIN_LENGTH = 7;
+
     /**
      * @Route("/user/login", name="login")
      * @Method({"GET"})
@@ -65,7 +67,10 @@ class UserController extends Controller
         $encoder = $this->container->get('security.password_encoder');
 
         $user = new User();
-        $form = $this->createForm(UserForm::class, $user, []);
+        $form = $this->createForm(
+            UserForm::class, $user,
+            ['validation_groups' => ['user_register'], 'required' => false]
+        );
         $form->add('register', SubmitType::class);
         $form->handleRequest($request);
 
@@ -102,10 +107,18 @@ class UserController extends Controller
     protected function validateSubmittedUser(User $user, UserRepository $userRepository, FormInterface $form)
     {
         $isValid = true;
-        if ($user->getPassword() !== $user->getCpassword()) {
-            $field = $form->get('cpassword');
-            $field->addError(new FormError("Passwords must be equal"));
-            $isValid = false;
+        $password = $user->getPassword();
+        $cpassword = $user->getCpassword();
+        if ($cpassword) {
+            if ($password != $cpassword) {
+                $field = $form->get('cpassword');
+                $field->addError(new FormError("Passwords must be equal"));
+                $isValid = false;
+            } elseif (strlen($cpassword) < self::SUBMITTED_USER_PASSWORD_MIN_LENGTH) {
+                $field = $form->get('password');
+                $field->addError(new FormError("Password must have length of 7 or more characters"));
+                $isValid = false;
+            }
         }
 
         if ($userRepository->userExists($user)){
@@ -137,16 +150,55 @@ class UserController extends Controller
      * @Route("/user/edit/{id}", name="user_edit", requirements={
      *     "userId": "\d+"
      * })
-     * @Method({"GET"})
+     * @Method({"GET", "POST"})
+     *
+     * @param Request $request
      * @param User $user
      * @return Response
      */
-    public function editAction(User $user)
+    public function editAction(Request $request, User $user)
     {
+        // checking access
+        if (!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getId() != $user->getId()) {
+            throw $this->createAccessDeniedException('Unable to access this page!');
+        }
+
+        if ($this->getUser()->getId() != $user->getId()) {
+            $validationGroups = ['user_edit'];
+        } else {
+            $validationGroups = ['profile_edit'];
+        }
+        $form = $this->createForm(
+            UserForm::class, $user,
+            ['validation_groups' => $validationGroups, 'required' => false]
+        );
+        $form->add('Save', SubmitType::class);
+
+        $form->handleRequest($request);
+        $userRepository = $this->getDoctrine()->getRepository('BugTrackerBundle:User');
+        if ($form->isSubmitted() && $form->isValid()
+            && $this->validateSubmittedUser($user, $userRepository, $form)
+        ){
+            $encoder = $this->container->get('security.password_encoder');
+
+            if ($user->getCpassword()) {
+                $plainPassword = $user->getPassword();
+                $encodedPassword = $encoder->encodePassword($user, $plainPassword);
+                $user->setPassword($encodedPassword);
+            }
+            $userRepository->save($user);
+
+            return $this->redirect($request->getUri());
+        }
+
         // replace this example code with whatever you need
-        return $this->render('BugTrackerBundle:default:index.html.twig', array(
-            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..').DIRECTORY_SEPARATOR,
-        ));
+        return $this->render(
+            'BugTrackerBundle:user:edit.html.twig',
+            [
+                'form' => $form->createView(),
+                'user' => $user
+            ]
+        );
     }
 
     /**

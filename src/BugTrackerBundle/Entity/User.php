@@ -48,7 +48,6 @@ class User implements UserInterface, \Serializable
     /**
      * @ORM\Column(type="string", length=128)
      *
-     * @Assert\NotBlank()
      */
     private $password_hash;
 
@@ -59,9 +58,21 @@ class User implements UserInterface, \Serializable
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(groups={"useredit"})
+     * @Assert\NotBlank(groups={"user_edit"})
      */
     private $roles;
+
+    /**
+     * @return array
+     */
+    static public function availableRoles()
+    {
+        return [
+            self::OPERATOR_ROLE => 'Operator',
+            self::MANAGER_ROLE => 'Manager',
+            self::ADMIN_ROLE => 'Administrator'
+        ];
+    }
 
     /**
      * Get id
@@ -150,13 +161,18 @@ class User implements UserInterface, \Serializable
      */
     public function setPassword($passwordHash)
     {
-        $this->password_hash = $passwordHash;
+        if ($passwordHash) {
+            $this->password_hash = $passwordHash;
+        }
 
         return $this;
     }
 
     /**
      * Get password_hash
+     *
+     * @Assert\NotBlank(groups={"user_register"})
+     * @Assert\Length(min=7)
      *
      * @return string
      */
@@ -177,6 +193,8 @@ class User implements UserInterface, \Serializable
     }
 
     /**
+     * @Assert\NotBlank(groups={"user_register"})
+     *
      * @return null
      */
     public function getCpassword()
@@ -205,7 +223,7 @@ class User implements UserInterface, \Serializable
      */
     public function setRoles($roles)
     {
-        $this->roles = implode(',', $roles);
+        $this->roles = implode(',', (array)$roles);
 
         return $this;
     }

@@ -4,17 +4,30 @@
         <meta charset="UTF-8" />
         <title>{% block title %}Welcome!{% endblock %}</title>
         {% block stylesheets %}
-            {% stylesheets '@BugTrackerBundle/Resources/css/main.css'%}
+            {% stylesheets '@BugTrackerBundle/Resources/assets/bootstrap/css/*'%}
+            <link rel="stylesheet" href="{{ asset_url }}" />
+            {% endstylesheets %}
+
+            {% stylesheets '@BugTrackerBundle/Resources/assets/custom/css/*'%}
                 <link rel="stylesheet" href="{{ asset_url }}" />
             {% endstylesheets %}
         {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
-        <div id="wrapper">
+        <div id="wrapper" class="container">
             {% block header %}{% endblock %}
             {% block body %}{% endblock %}
-            {% block javascripts %}{% endblock %}
+            {% block javascripts %}
+                {% javascripts '@BugTrackerBundle/Resources/assets/jquery/js/*' %}
+                <script type="text/javascript" src="{{ asset_url }}" ></script>
+                {% endjavascripts %}
+                {% javascripts
+                    '@BugTrackerBundle/Resources/assets/bootstrap/js/bootstrap.min.js'
+                %}
+                <script type="text/javascript" src="{{ asset_url }}" ></script>
+                {% endjavascripts %}
+            {% endblock %}
         </div>
     </body>
 </html>

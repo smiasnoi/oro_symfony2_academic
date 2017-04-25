@@ -26,12 +26,18 @@ class UserRepository extends EntityRepository
      */
     public function userExists(User $user)
     {
+        $userIdExpression = $user->getId() ? ' AND u.id <> :id' : null;
         $query = $this->getEntityManager()
             ->createQuery(
-                "SELECT COUNT(u) FROM BugTrackerBundle:User u WHERE u.username = :username OR u.email = :email"
+                "SELECT COUNT(u) 
+                 FROM BugTrackerBundle:User u 
+                 WHERE (u.username = :username OR u.email = :email)$userIdExpression"
             )
             ->setParameter('username', $user->getUsername())
             ->setParameter('email', $user->getEmail());
+        if ($userIdExpression) {
+            $query->setParameter('id', $user->getId());
+        }
 
         return $query->getSingleScalarResult();
     }

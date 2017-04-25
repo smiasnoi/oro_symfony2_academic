@@ -1,7 +1,7 @@
 {% macro renderNavPanelPattern1(collection) %}
 <div class="navPanel">
     <div class="position">Page {{ collection.current_page }} of {{ collection.total_pages }}</div>
-    <ul class="navButtons">
+    <ul class="navButtons pager">
         <li class="prev-link">
             {% if collection.prev_page_url %}
                 <a href="{{ collection.prev_page_url }}">&lt;</a>
