@@ -7,7 +7,9 @@ use Doctrine\Common\Collections\Criteria;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\HttpFoundation\Request;
+use BugTrackerBundle\Helper\Pagination;
 
 class ProjectController extends Controller
 {
@@ -25,62 +27,25 @@ class ProjectController extends Controller
      */
     public function viewAction(Request $request, Project $project)
     {
-        $pagingParams = ['id' => $project->getId()];
-        $query = $request->query;
-
-        $pageVarsPrefixes = [
-            'activities' => self::ACTIVITIES_PAGE_VAR,
-            'members' => self::MEMBERS_PAGE_VAR
-        ];
-        foreach ($pageVarsPrefixes as $pageVarPrefix => $queryVar) {
-            $pageVar = $pageVarPrefix . 'Page';
-            $$pageVar = 1;
-            if ($page = $query->get($queryVar)) {
-                $pagingParams[$queryVar] = $$pageVar = $page;
-            }
-        }
-
-        $activities = $project->getActivities();
-        $activitiesTotalPages = ceil($activities->count() / self::ACTIVITIES_PAGE_SIZE);
-        $members = $project->getMembers();
-        $membersTotalPages = ceil($members->count() / self::MEMBERS_PAGE_SIZE);
-
-        foreach ($pageVarsPrefixes as $pageVarPrefix => $queryVar) {
-            $pageVar = $pageVarPrefix . 'Page';
-            $totalPagesVar = $pageVarPrefix . 'TotalPages';
-            $prevPageUrlVar = $pageVarPrefix . 'PrevPageUrl';
-            $nextPageUrlVar = $pageVarPrefix . 'NextPageUrl';
-
-            $_pagingParams = $pagingParams;
-            if ($$pageVar > 1) {
-                $_pagingParams[$queryVar]--;
-                if ($_pagingParams[$queryVar] == 1) {
-                    unset($_pagingParams[$queryVar]);
-                }
-                $$prevPageUrlVar = $this->generateUrl('project_view', $_pagingParams);
-            } else {
-                $$prevPageUrlVar = null;
-            }
-
-            $_pagingParams = $pagingParams;
-            if ($$pageVar < $$totalPagesVar) {
-                if (isset($_pagingParams[$queryVar])) {
-                    $_pagingParams[$queryVar]++;
-                } else {
-                    $_pagingParams[$queryVar] = 2;
-                }
-                $$nextPageUrlVar = $this->generateUrl('project_view', $_pagingParams);
-            } else {
-                $$nextPageUrlVar = null;
-            }
-        }
+        $queryParams = (array)$request->query->all();
+        $queryParams['id'] = $project->getId();
+        $helper = new Pagination($this->container, $request);
 
         $criteria = new Criteria();
+
+        $members = $project->getMembers();
+        $membersTotalPages = ceil($members->count() / self::MEMBERS_PAGE_SIZE);
+        $membersPagesInfo = $helper->getPrevNextUrls(self::MEMBERS_PAGE_VAR, $membersTotalPages, 'project_view', $queryParams);
+        $membersPage = $membersPagesInfo['current_page'];
         $offset = ($membersPage - 1) * self::MEMBERS_PAGE_SIZE;
         $criteria->setFirstResult($offset)
             ->setMaxResults(self::MEMBERS_PAGE_SIZE);
         $filteredMembers = $members->matching($criteria);
 
+        $activities = $project->getActivities();
+        $activitiesTotalPages = ceil($activities->count() / self::ACTIVITIES_PAGE_SIZE);
+        $activitiesPagesInfo = $helper->getPrevNextUrls(self::ACTIVITIES_PAGE_VAR, $activitiesTotalPages, 'project_view', $queryParams);
+        $activitiesPage = $activitiesPagesInfo['current_page'];
         $offset = ($activitiesPage - 1) * self::ACTIVITIES_PAGE_SIZE;
         $criteria->setFirstResult($offset)
             ->setMaxResults(self::ACTIVITIES_PAGE_SIZE)
@@ -91,21 +56,37 @@ class ProjectController extends Controller
             'BugTrackerBundle:project:view.html.twig',
             [
                 'project' => $project,
-                'activities' => [
-                    'items' => $filteredActivities,
-                    'total_pages' => $activitiesTotalPages,
-                    'prev_page_url' => $activitiesPrevPageUrl,
-                    'next_page_url' => $activitiesNextPageUrl,
-                    'current_page' => $activitiesPage
-                ],
-                'members' => [
-                    'items' => $filteredMembers,
-                    'total_pages' => $membersTotalPages,
-                    'prev_page_url' => $membersPrevPageUrl,
-                    'next_page_url' => $membersNextPageUrl,
-                    'current_page' => $membersPage
-                ],
+                'activities' => array_merge(['items' => $filteredActivities], $activitiesPagesInfo),
+                'members' => array_merge(['items' => $filteredMembers], $membersPagesInfo)
             ]
         );
+    }
+
+
+    /**
+     * @Route("/issue/edit/{id}", name="project_edit", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method({"GET", "POST"})
+     *
+     * @param Request $request
+     * @param Project $project
+     * @return Response
+     */
+    public function editAction(Request $request, Project $project)
+    {
+        // @TODO implement new issue form for storie's subtask creation
+        return new Response();
+    }
+
+    /**
+     * @Route("/project/new", name="project_new")
+     * @param Request $request
+     * @return Response
+     */
+    public function createAction(Request $request)
+    {
+        // @TODO implement new issue form for storie's subtask creation
+        return new Response();
     }
 }

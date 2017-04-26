@@ -79,6 +79,17 @@ class IssueController extends Controller
         );
     }
 
+    /**
+     * @Route("/issue/edit/{id}", name="issue_edit", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method({"GET", "POST"})
+     */
+    public function editAction(Issue $issue)
+    {
+        // @TODO implement new issue form for storie's subtask creation
+        return new Response();
+    }
 
     /**
      * @Route("/story/new/subtask/{id}", name="new_story_subtask", requirements={

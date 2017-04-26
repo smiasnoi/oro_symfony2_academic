@@ -4,19 +4,24 @@
 {% block body %}
     <div id="container">
         <div id="issueWrapper">
-            <h1 class="summary">{{ issue.summary|e }}</h1>
+            <h2 class="code">{{ issue.code }}</h2>
+            <h3>{{ issue.summary }}</h3>
+            <hr />
 
-            <ul class="actions">
-                <li>Edit</li>
-                <li>Comment</li>
-                <li>Assign</li>
-                <li>Change Status</li>
-                {% if issue.type == 'story' %}
-                    <li>
-                        <a href="{{ path('new_story_subtask', {'id': issue.id}) }}">Create Subtask</a>
-                    </li>
-                {% endif %}
-            </ul>
+            <div class="navbar actions">
+                <div class="container-fluid">
+                    <div class="nav navbar-nav">
+                        {% if is_granted('ROLE_MANAGER') %}
+                        <a href="{{ path('issue_edit', {'id': issue.id}) }}" class="btn btn-default navbar-btn">Edit</a>
+                        {% endif %}
+                        <a href="#commentFormWrapper" class="btn btn-default btn-comment navbar-btn">Comment</a>
+                        <a href="#" class="btn btn-default navbar-btn">Change Status</a>
+                        {% if issue.type == 'story' %}
+                            <a href="{{ path('new_story_subtask', {'id': issue.id}) }}" class="btn btn-default navbar-btn">Create Subtask</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-6">
@@ -71,7 +76,7 @@
 
             {% if issue.parent %}
             <div class="panel panel-default">
-                <div class="panel-heading"><strong>Parent task</strong></p>
+                <div class="panel-heading"><strong>Parent task</strong></div>
                 <div class="parent-task panel-body">
                     <a target="_blank" href="{{ path('issue_view', {'id': issue.parent.id}) }}">
                         <span class="summary">{{ issue.parent.summary }}</span> |
@@ -111,26 +116,45 @@
                             {% for comment in comments %}
                                 <li>
                                     {% if loop.first == false %}<hr />{% endif %}
-                                    <span class="author">{{ comment.author.fullname }}</span>
+                                    <a class="user-link" target="_blank" href="{{ path('user_view', {'id': comment.author.id}) }}">
+                                        {{ comment.author.fullname }}
+                                    </a>
                                     <p class="body">{{ comment.body|nl2br }}</p>
                                 </li>
                             {% endfor %}
                             </ul>
                             {% endif %}
-                            {{ form_start(comment_form, {'attr': {'id': 'commentForm'}}) }}
-                            {{ form_widget(comment_form) }}
-                            {{ form_end(comment_form) }}
+
+                            <button class="btn btn-primary btn-comment">Comment</button>
                         </div>
                         <div id="issueCollaboratorsTab" class="tab-pane fade">
                             <ul class="collaborators list-unstyled">
                             {% for collaborator in issue.collaborators %}
                                 <li>
                                     {% if loop.first == false %}<hr />{% endif %}
-                                    <span class="name">{{ collaborator.fullname }}</span>
+                                    <a class="user-link" target="_blank" href="{{ path('user_view', {'id': collaborator.id}) }}">
+                                        {{ collaborator.fullname }}
+                                    </a>
                                 </li>
                             {% endfor %}
                             </ul>
                         </div>
+                    </div>
+
+                    <div id="commentFormWrapper" class="collapse panel-body form-horizontal">
+                        {{ form_start(comment_form, {'attr': {'id': 'commentForm'}}) }}
+                        <div class="form-group">
+                            <div class="col-sm-8">
+                                {{ form_widget(comment_form.body, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-8">
+                                {{ form_widget(comment_form.add, {'attr': {'class': 'btn btn-primary'}}) }}
+                                {{ form_widget(comment_form.cancel, {'attr': {'class': 'btn btn-default btn-cancel-comment'}}) }}
+                            </div>
+                        </div>
+                        {{ form_end(comment_form) }}
                     </div>
                 </div>
             </div>

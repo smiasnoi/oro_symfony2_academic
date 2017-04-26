@@ -15,10 +15,18 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use BugTrackerBundle\Entity\User;
 use BugTrackerBundle\Form\User\EditType as UserForm;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Doctrine\Common\Collections\Criteria;
+use BugTrackerBundle\Helper\Pagination;
 
 class UserController extends Controller
 {
     const SUBMITTED_USER_PASSWORD_MIN_LENGTH = 7;
+
+    CONST ACTIVITIES_PAGE_SIZE = 10;
+    CONST ACTIVITIES_PAGE_VAR = 'acp';
+
+    CONST ISSUES_PAGE_SIZE = 8;
+    CONST ISSUES_PAGE_VAR = 'isp';
 
     /**
      * @Route("/user/login", name="login")
@@ -135,13 +143,49 @@ class UserController extends Controller
      * })
      * @Method({"GET"})
      */
-    public function viewAction(User $user)
+    public function viewAction(Request $request, User $user)
     {
+        $queryParams = (array)$request->query->all();
+        $queryParams['id'] = $user->getId();
+        $helper = new Pagination($this->container, $request);
+
+        $criteria = new Criteria();
+
+        $activities = $user->getActivities();
+        $activitiesTotalPages = ceil($activities->count() / self::ACTIVITIES_PAGE_SIZE);
+        $activitiesPagesInfo = $helper->getPrevNextUrls(self::ACTIVITIES_PAGE_VAR, $activitiesTotalPages, 'user_view', $queryParams);
+        $activitiesPage = $activitiesPagesInfo['current_page'];
+        $offset = ($activitiesPage - 1) * self::ACTIVITIES_PAGE_SIZE;
+        $criteria->setFirstResult($offset)
+            ->setMaxResults(self::ACTIVITIES_PAGE_SIZE);
+        $filteredActivities = $activities->matching($criteria);
+
+        $em = $this->getDoctrine()->getEntityManager();
+        $issuesQb = $em->createQueryBuilder();
+        $issuesQb->select('i')
+            ->from('BugTrackerBundle:Issue', 'i')
+            ->where('i.status IN(:statuses) AND i.assignee=:assignee')
+            ->orderBy('i.updatedAt', 'DESC')
+            ->setParameter(':statuses', ['open', 'reopened'])
+            ->setParameter(':assignee', $user->getId());
+        $issuesTotalsQb = clone $issuesQb;
+        $totalIssueItems = $issuesTotalsQb->select('COUNT(i)')
+            ->getQuery()
+            ->getSingleScalarResult();
+        $totalIssuesPages = ceil($totalIssueItems / self::ISSUES_PAGE_SIZE);
+        $issuesPagesInfo = $helper->getPrevNextUrls(self::ISSUES_PAGE_VAR, $totalIssuesPages, 'user_view', $queryParams);
+        $offset = self::ISSUES_PAGE_SIZE * ($issuesPagesInfo['current_page'] - 1);
+        $filteredIssues = $issuesQb->setMaxResults(self::ISSUES_PAGE_SIZE)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+
         return $this->render(
             'BugTrackerBundle:user:view.html.twig',
             [
                 'user' => $user,
-                'logged_user' => $this->getUser()
+                'activities' => array_merge(['items' => $filteredActivities], $activitiesPagesInfo),
+                'issues' => array_merge(['items' => $filteredIssues], $issuesPagesInfo)
             ]
         );
     }
@@ -172,7 +216,7 @@ class UserController extends Controller
             UserForm::class, $user,
             ['validation_groups' => $validationGroups, 'required' => false]
         );
-        $form->add('Save', SubmitType::class);
+        $form->add('save', SubmitType::class);
 
         $form->handleRequest($request);
         $userRepository = $this->getDoctrine()->getRepository('BugTrackerBundle:User');
@@ -207,15 +251,13 @@ class UserController extends Controller
      */
     public function listViewAction(Request $request)
     {
+        $helper = new Pagination($this->container, $request);
         $userRepository = $this->getDoctrine()->getRepository('BugTrackerBundle:User');
-        $collection = $userRepository->getFilteredCollection((int)$request->query->get('page'));
-        $collection['prev_page_url'] = $collection['current_page'] > 1 ?
-            $this->generateUrl('users_list_view', ['page' => $collection['current_page'] - 1]) : null;
-        $collection['next_page_url'] = $collection['current_page'] < $collection['total_pages'] ?
-            $this->generateUrl('users_list_view', ['page' => $collection['current_page'] + 1]) : null;
+        $users = $userRepository->getFilteredCollection((int)$request->query->get('page'));
+        $users = array_merge($users, $helper->getPrevNextUrls('page', $users['total_pages'], 'users_list_view'));
 
         return $this->render('BugTrackerBundle:user:list.html.twig',
-            ['collection' => $collection]
+            ['users' => $users]
         );
     }
 }

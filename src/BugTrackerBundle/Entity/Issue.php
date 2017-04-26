@@ -158,6 +158,7 @@ class Issue
         return [
             'new' => 'New',
             'open' => 'Open',
+            'reopened' => 'Reopened',
             'in_porgress' => 'In progress',
             'closed' => 'Closed'
         ];

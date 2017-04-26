@@ -28,19 +28,19 @@ class Activity
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Project")
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="activities")
      * @ORM\JoinColumn(name="project_id", referencedColumnName="id")
      */
     private $project;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Issue")
+     * @ORM\ManyToOne(targetEntity="Issue", inversedBy="activities")
      * @ORM\JoinColumn(name="issue_id", referencedColumnName="id")
      */
     private $issue;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="activities")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
     private $user;

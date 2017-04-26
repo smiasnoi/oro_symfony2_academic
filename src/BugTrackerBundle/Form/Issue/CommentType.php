@@ -2,6 +2,7 @@
 namespace BugTrackerBundle\Form\Issue;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ResetType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -12,7 +13,8 @@ class CommentType extends AbstractType
     {
         $builder
             ->add('body', TextareaType::class)
-            ->add('submit', SubmitType::class)
+            ->add('add', SubmitType::class)
+            ->add('cancel', ResetType::class)
         ;
     }
 }

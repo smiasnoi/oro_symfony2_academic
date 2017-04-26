@@ -1,6 +1,10 @@
 # To get started with security, check out the documentation:
 # http://symfony.com/doc/current/security.html
 security:
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_MANAGER, ROLE_OPERATOR]
+        ROLE_MANAGER: ROLE_OPERATOR
+
     encoders:
         BugTrackerBundle\Entity\User:
             algorithm: bcrypt

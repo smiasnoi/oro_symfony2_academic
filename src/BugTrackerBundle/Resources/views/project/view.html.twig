@@ -5,14 +5,17 @@
 {% block body %}
     <div id="container">
         <div id="projectWrapper">
-            <div class="headedContainer">
-                <h2 class="heading">Summary</h2>
-                <p class="description">{{ project.summary }}</p>
-            </div>
+            <h2 class="summary">{{ project.summary }}</h2>
 
-            <ul class="actions">
-                <li>Edit</li>
-            </ul>
+            {% if is_granted('ROLE_MANAGER') %}
+            <div class="navbar actions">
+                <div class="container-fluid">
+                    <div class="nav navbar-nav">
+                        <a href="{{ path('project_edit', {'id': project.id}) }}" class="btn btn-default navbar-btn">Edit</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
             <div class="panel panel-default">
                 <div class="panel-heading"><strong>Details</strong></div>

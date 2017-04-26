@@ -63,6 +63,11 @@ class User implements UserInterface, \Serializable
     private $roles;
 
     /**
+     * @ORM\OneToMany(targetEntity="Activity", mappedBy="user")
+     */
+    private $activities;
+
+    /**
      * @return array
      */
     static public function availableRoles()
@@ -72,6 +77,14 @@ class User implements UserInterface, \Serializable
             self::MANAGER_ROLE => 'Manager',
             self::ADMIN_ROLE => 'Administrator'
         ];
+    }
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->activities = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -236,6 +249,39 @@ class User implements UserInterface, \Serializable
     public function getRoles()
     {
         return explode(',', $this->roles);
+    }
+
+    /**
+     * Add activity
+     *
+     * @param \BugTrackerBundle\Entity\Activity $activity
+     * @return Issue
+     */
+    public function addActivity(\BugTrackerBundle\Entity\Activity $activity)
+    {
+        $this->activities[] = $activity;
+
+        return $this;
+    }
+
+    /**
+     * Remove activity
+     *
+     * @param \BugTrackerBundle\Entity\Activity $acactivity
+     */
+    public function removeActivity(\BugTrackerBundle\Entity\Activity $acactivity)
+    {
+        $this->activities->removeElement($acactivity);
+    }
+
+    /**
+     * Get activities
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getActivities()
+    {
+        return $this->activities;
     }
 
     /** @see \Serializable::serialize() */

@@ -87,7 +87,6 @@ class UserRepository extends EntityRepository
         return [
             'items' => $query->getResult(),
             'total_pages' => $totalPages,
-            'total_items' => $totalItems,
             'current_page' => $page
         ];
     }

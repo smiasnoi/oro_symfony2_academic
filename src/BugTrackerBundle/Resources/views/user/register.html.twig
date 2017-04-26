@@ -1,15 +1,62 @@
 {% extends 'BugTrackerBundle::base.html.twig' %}
 {% block title %}Register New Operator{% endblock %}
 {% block body %}
-    {{ form_start(form, {'attr': {'id': 'userForm'}}) }}
-        {{ form_errors(form) }}
-
-        {{ form_row(form.email) }}
-        {{ form_row(form.username) }}
-        {{ form_row(form.fullname) }}
-        {{ form_row(form.password) }}
-        {{ form_row(form.cpassword) }}
-
-        {% do form.roles.setRendered %}
-    {{ form_end(form) }}
+    <div class="vertical-center">
+        <div class="jumbotron col-sm-6 form-horizontal">
+        {{ form_start(form, {'attr': {'id': 'userForm'}}) }}
+            {{ form_errors(form) }}
+            <div class="form-group">
+                <div class="col-sm-4 control-label">
+                {{ form_label(form.email) }}
+                </div>
+                <div class="col-sm-8">
+                {{ form_errors(form.email) }}
+                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">
+                {{ form_label(form.username) }}
+                </div>
+                <div class="col-sm-8">
+                {{ form_errors(form.username) }}
+                {{ form_widget(form.username, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">
+                {{ form_label(form.fullname) }}
+                </div>
+                <div class="col-sm-8">
+                {{ form_errors(form.fullname) }}
+                {{ form_widget(form.fullname, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">
+                {{ form_label(form.password) }}
+                </div>
+                <div class="col-sm-8">
+                {{ form_errors(form.password) }}
+                {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 control-label">
+                {{ form_label(form.cpassword) }}
+                </div>
+                <div class="col-sm-8">
+                {{ form_errors(form.cpassword) }}
+                {{ form_widget(form.cpassword, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            {% do form.roles.setRendered %}
+            <div class="form-group">
+                <div class="col-sm-offset-4 col-sm-8">
+                {{ form_widget(form.register, {'attr': {'class': 'btn btn-default'}}) }}
+                </div>
+            </div>
+        {{ form_end(form) }}
+        </div>
+    </div>
 {% endblock %}

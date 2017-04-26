@@ -1,4 +1,6 @@
 {% extends 'BugTrackerBundle::base.html.twig' %}
+{% import 'BugTrackerBundle:activity:macros.html.twig' as activityMacros %}
+{% import 'BugTrackerBundle::pagination.html.twig' as pagination %}
 
 {% block body %}
 <div id="container">
@@ -9,15 +11,66 @@
             {% endif %}
         </ul>
 
-        <div class="headedContainer">
-            <h2 class="heading">Details</h2>
-            <dl class="details">
-                <dt>Username</dt><dd>{{ user.username }}</dd>
-                <dt>Fullname</dt><dd>{{ user.fullname }}</dd>
-                <dt>Email</dt><dd>{{ user.email }}</dd>
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>Details</strong></div>
+            <div class="panel-body">
+                <dl class="details dl-horizontal">
+                    <dt>Username</dt><dd>{{ user.username }}</dd>
+                    <dt>Fullname</dt><dd>{{ user.fullname }}</dd>
+                    <dt>Email</dt><dd>{{ user.email }}</dd>
 
-                <dt>Roles</dt><dd>{{ user.roles|join(', ') }}</dd>
-            </dl>
+                    <dt>Roles</dt><dd>{{ user.roles|join(', ') }}</dd>
+                </dl>
+            </div>
+        </div>
+        <div class="row">
+            {% if activities|length %}
+            <div class="col-md-8">
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>Activity</strong></div>
+                    <div class="panel-body">
+                        <ul class="activities list-unstyled">
+                            {% for activity in activities.items %}
+                                {% if loop.first == false %}<hr />{% endif %}
+                                <li>
+                                    {% set targetActivityRenderer =  'render_' ~ activity.type ~ '_for_user' %}
+                                    {% if attribute(activityMacros, targetActivityRenderer) is defined %}
+                                        {{ attribute(activityMacros, targetActivityRenderer, {'activity': activity}) }}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        {{ pagination.renderNavPanelPattern1(activities) }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if issues|length %}
+                <div class="col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>Opened/Reopened Issues</strong></div>
+                        <div class="panel-body">
+                            <ul class="activities list-unstyled">
+                                {% for issue in issues.items %}
+                                    {% if loop.first == false %}<hr />{% endif %}
+                                    <li>
+                                        <div class="line">
+                                            <a class="issue-link" target="_blank" href="{{ path('issue_view', {'id': issue.Id}) }}">
+                                                {{ issue.code }}
+                                            </a>
+                                        </div>
+                                        <div class="line">
+                                            "{{ issue.summary[:60] }}..."
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            {{ pagination.renderNavPanelPattern1(issues) }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

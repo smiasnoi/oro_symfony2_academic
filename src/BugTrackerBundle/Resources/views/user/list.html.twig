@@ -15,7 +15,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    {%  for user in collection.items %}
+                    {%  for user in users.items %}
                         <tr>
                             <td>{{ user.username|e }}</td>
                             <td>{{ user.fullname|e }}</td>
@@ -31,7 +31,8 @@
                     {%  endfor %}
                 </tbody>
             </table>
-            {{ pagination.renderNavPanelPattern1(collection) }}
+            {{ pagination.renderNavPanelPattern1(users) }}
         </div>
     </div>
 {% endblock %}
+
