@@ -2,23 +2,29 @@
 {% import 'BugTrackerBundle:activity:macros.html.twig' as activityMacros %}
 {% import 'BugTrackerBundle::pagination.html.twig' as pagination %}
 
+{% block title %}{{ user.fullname }}'s profile{% endblock %}
 {% block body %}
 <div id="container">
     <div id="userEditWrapper">
-        <ul class="actions">
-            {% if is_granted('ROLE_ADMIN') or (user.id == logged_user.id) %}
-                <li><a href="{{ path('user_edit', {'id': user.id }) }}">Edit profile</a></li>
-            {% endif %}
-        </ul>
+        <div class="navbar actions">
+            <h2 class="name">{{ user.fullname }}'s profile</h2>
+            <hr />
+
+            <div class="container-fluid">
+                <div class="nav navbar-nav">
+                    {% if is_granted('ROLE_ADMIN') or (user.id == app.user.id) %}
+                    <a href="{{ path('user_edit', {'id': user.id }) }}" class="btn btn-default navbar-btn">Edit</a></li>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
         <div class="panel panel-default">
             <div class="panel-heading"><strong>Details</strong></div>
             <div class="panel-body">
                 <dl class="details dl-horizontal">
                     <dt>Username</dt><dd>{{ user.username }}</dd>
-                    <dt>Fullname</dt><dd>{{ user.fullname }}</dd>
                     <dt>Email</dt><dd>{{ user.email }}</dd>
-
                     <dt>Roles</dt><dd>{{ user.roles|join(', ') }}</dd>
                 </dl>
             </div>

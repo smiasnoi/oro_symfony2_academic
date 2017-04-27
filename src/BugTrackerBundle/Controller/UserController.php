@@ -22,6 +22,9 @@ class UserController extends Controller
 {
     const SUBMITTED_USER_PASSWORD_MIN_LENGTH = 7;
 
+    CONST USERS_PAGE_SIZE = 16;
+    CONST USERS_PAGE_VAR = 'up';
+
     CONST ACTIVITIES_PAGE_SIZE = 10;
     CONST ACTIVITIES_PAGE_VAR = 'acp';
 
@@ -185,7 +188,8 @@ class UserController extends Controller
             [
                 'user' => $user,
                 'activities' => array_merge(['items' => $filteredActivities], $activitiesPagesInfo),
-                'issues' => array_merge(['items' => $filteredIssues], $issuesPagesInfo)
+                'issues' => array_merge(['items' => $filteredIssues], $issuesPagesInfo),
+                'route_group' => 'users'
             ]
         );
     }
@@ -240,24 +244,41 @@ class UserController extends Controller
             'BugTrackerBundle:user:edit.html.twig',
             [
                 'form' => $form->createView(),
-                'user' => $user
+                'user' => $user,
+                'route_group' => 'users'
             ]
         );
     }
 
     /**
-     * @Route("/user/list", name="users_list_view")
+     * @Route("/user/list", name="users_list")
      * @Method({"GET"})
      */
     public function listViewAction(Request $request)
     {
+        $em = $this->getDoctrine()->getEntityManager();
         $helper = new Pagination($this->container, $request);
-        $userRepository = $this->getDoctrine()->getRepository('BugTrackerBundle:User');
-        $users = $userRepository->getFilteredCollection((int)$request->query->get('page'));
-        $users = array_merge($users, $helper->getPrevNextUrls('page', $users['total_pages'], 'users_list_view'));
 
-        return $this->render('BugTrackerBundle:user:list.html.twig',
-            ['users' => $users]
+        $users = $em->createQueryBuilder();
+        $users->select('u')->from('BugTrackerBundle:User', 'u');
+        $usersTotalsQb = clone $users;
+        $totalUserItems = $usersTotalsQb->select('COUNT(u)')
+            ->getQuery()
+            ->getSingleScalarResult();
+        $totalUsersPages = ceil($totalUserItems / self::USERS_PAGE_SIZE);
+        $issuesPagesInfo = $helper->getPrevNextUrls(self::USERS_PAGE_VAR, $totalUsersPages, 'users_list');
+        $offset = self::USERS_PAGE_SIZE * ($issuesPagesInfo['current_page'] - 1);
+        $filteredUsers = $users->setMaxResults(self::USERS_PAGE_SIZE)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+
+        return $this->render(
+            'BugTrackerBundle:user:list.html.twig',
+            [
+                'users' => array_merge(['items' => $filteredUsers], $issuesPagesInfo),
+                'route_group' => 'users'
+            ]
         );
     }
 }

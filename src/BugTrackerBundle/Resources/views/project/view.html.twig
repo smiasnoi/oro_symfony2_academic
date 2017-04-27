@@ -2,6 +2,7 @@
 {% import 'BugTrackerBundle:activity:macros.html.twig' as activityMacros %}
 {% import 'BugTrackerBundle::pagination.html.twig' as pagination %}
 
+{% block title %}[{{ project.code }}] | {{ project.summary[:40] }}... {% endblock %}
 {% block body %}
     <div id="container">
         <div id="projectWrapper">

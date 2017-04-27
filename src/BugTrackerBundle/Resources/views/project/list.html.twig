@@ -1,0 +1,37 @@
+{% extends 'BugTrackerBundle::base.html.twig' %}
+{% import 'BugTrackerBundle::pagination.html.twig' as pagination %}
+
+{% block title %}Issues{% endblock %}
+{% block body %}
+    <div id="container">
+        <!-- grid content -->
+        <div id="userGridWrapper table-responsive">
+            <h2>Projects</h2>
+            <table class="itemsGrid table tabled-bordered table-striped">
+                <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Summary</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {%  for project in projects.items %}
+                    <tr>
+                        <td>{{ project.code }}</td>
+                        <td>{{ project.summary }}</td>
+                        <td>
+                            <a href="{{ path('project_view', {'id': project.id}) }}">View</a>
+                            {% if is_granted('ROLE_MANAGER') %} |
+                                <a href="{{ path('project_edit', {'id': project.id}) }}">Edit</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {%  endfor %}
+                </tbody>
+            </table>
+            {{ pagination.renderNavPanelPattern1(projects) }}
+        </div>
+    </div>
+{% endblock %}
+

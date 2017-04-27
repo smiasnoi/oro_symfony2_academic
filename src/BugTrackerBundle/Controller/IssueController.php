@@ -12,9 +12,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use BugTrackerBundle\Helper\Pagination;
 
 class IssueController extends Controller
 {
+    CONST ISSUES_PAGE_SIZE = 16;
+    CONST ISSUES_PAGE_VAR = 'isp';
+
     /**
      * @Route("/issue/{id}", name="issue_view", requirements={
      *     "id": "\d+"
@@ -74,7 +78,8 @@ class IssueController extends Controller
                 'issue' => $issue,
                 'comments' => $comments,
                 'activities' => $activities,
-                'comment_form' => $form->createView()
+                'comment_form' => $form->createView(),
+                'route_group' => 'issues'
             ]
         );
     }
@@ -101,5 +106,37 @@ class IssueController extends Controller
     {
         // @TODO implement new issue form for storie's subtask creation
         return new Response();
+    }
+
+    /**
+     * @Route("/issue/list", name="issues_list")
+     * @Method({"GET"})
+     */
+    public function listViewAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+        $helper = new Pagination($this->container, $request);
+
+        $issues = $em->createQueryBuilder();
+        $issues->select('i')->from('BugTrackerBundle:Issue', 'i');
+        $issuesTotalsQb = clone $issues;
+        $totalIssueItems = $issuesTotalsQb->select('COUNT(i)')
+            ->getQuery()
+            ->getSingleScalarResult();
+        $totalIssuesPages = ceil($totalIssueItems / self::ISSUES_PAGE_SIZE);
+        $issuesPagesInfo = $helper->getPrevNextUrls(self::ISSUES_PAGE_VAR, $totalIssuesPages, 'issues_list');
+        $offset = self::ISSUES_PAGE_SIZE * ($issuesPagesInfo['current_page'] - 1);
+        $filteredIssues = $issues->setMaxResults(self::ISSUES_PAGE_SIZE)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+
+        return $this->render(
+            'BugTrackerBundle:issue:list.html.twig',
+            [
+                'issues' => array_merge(['items' => $filteredIssues], $issuesPagesInfo),
+                'route_group' => 'issues'
+            ]
+        );
     }
 }

@@ -14,9 +14,46 @@
         {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
-    <body>
+    <body class="{% block body_class %}{% endblock %}">
         <div id="wrapper" class="container">
-            {% block header %}{% endblock %}
+
+            {% block header %}
+                {% if route_group is not defined %}
+                    {% set route_group = '' %}
+                {% endif %}
+                <nav class="navbar navbar-inverse navbar-fixed-top">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <a class="navbar-brand" href="{{ path('dashboard') }}">Academic Bug Tracker</a>
+                        </div>
+                        <ul class="nav navbar-nav">
+                            <li{% if route_group == "dashboard" %} class="active"{% endif %}><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                            <li{% if route_group == "projects" %} class="active"{% endif %}><a href="{{ path('projects_list') }}">Projects</a></li>
+                            <li{% if route_group == "issues" %} class="active"{% endif %}><a href="{{ path('issues_list') }}">Issues</a></li>
+                            <li{% if route_group == "users" %} class="active"{% endif %}>
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                    Users<span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{{ path('users_list') }}">List</a></li>
+                                    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                                    <li><a href="{{ path('user_view', {'id':app.user.id}) }}">Profile</a></li>
+                                    {% endif %}
+                                </ul>
+                            </li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                                <li><a href="{{ path('logout') }}">Logout</a></li>
+                            {% elseif is_granted('IS_AUTHENTICATED_ANONYMOUSLY') %}
+                                <li><a href="{{ path('register') }}">Sign Up</a></li>
+                                <li><a href="{{ path('login') }}">Login</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </nav>
+            {% endblock %}
+
             {% block body %}{% endblock %}
             {% block javascripts %}
                 {% javascripts '@BugTrackerBundle/Resources/assets/jquery/js/*' %}

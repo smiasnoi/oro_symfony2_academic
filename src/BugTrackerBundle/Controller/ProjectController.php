@@ -19,6 +19,9 @@ class ProjectController extends Controller
     CONST MEMBERS_PAGE_SIZE = 10;
     CONST MEMBERS_PAGE_VAR = 'up';
 
+    CONST PROJECTS_PAGE_SIZE = 16;
+    CONST PROJECTS_PAGE_VAR = 'p';
+
     /**
      * @Route("/project/{id}", name="project_view", requirements={
      *     "id": "\d+"
@@ -88,5 +91,38 @@ class ProjectController extends Controller
     {
         // @TODO implement new issue form for storie's subtask creation
         return new Response();
+    }
+
+    /**
+     * @Route("/project/list", name="projects_list")
+     * @param Request $request
+     * @return Response
+     */
+    public function listAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+        $helper = new Pagination($this->container, $request);
+
+        $projects = $em->createQueryBuilder();
+        $projects->select('p')->from('BugTrackerBundle:Project', 'p');
+        $projectsTotalsQb = clone $projects;
+        $totalProjectsItems = $projectsTotalsQb->select('COUNT(p)')
+            ->getQuery()
+            ->getSingleScalarResult();
+        $totalProjectPages = ceil($totalProjectsItems / self::PROJECTS_PAGE_SIZE);
+        $projectsPagesInfo = $helper->getPrevNextUrls(self::PROJECTS_PAGE_VAR, $totalProjectPages, 'projects_list');
+        $offset = self::PROJECTS_PAGE_SIZE * ($projectsPagesInfo['current_page'] - 1);
+        $filteredProjects = $projects->setMaxResults(self::PROJECTS_PAGE_SIZE)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+
+        return $this->render(
+            'BugTrackerBundle:project:list.html.twig',
+            [
+                'projects' => array_merge(['items' => $filteredProjects], $projectsPagesInfo),
+                'route_group' => 'projects'
+            ]
+        );
     }
 }

@@ -1,5 +1,6 @@
 {% extends 'BugTrackerBundle::base.html.twig' %}
 {% block title %}Login{% endblock %}
+{% block body_class %}centered-body{% endblock %}
 {% block body %}
     <div class="vertical-center">
         <div class="jumbotron col-sm-5 form-horizontal">
@@ -27,7 +28,7 @@
                     <div class="col-sm-offset-3 col-sm-9">
                         <button type="submit" class="btn btn-default">Log in</button>
                         or
-                        <a class="register_link" href="{{ path('register') }}">Register</a>
+                        <a class="register_link" href="{{ path('register') }}">Register</a> as operator
                     </div>
                 </div>
             </form>

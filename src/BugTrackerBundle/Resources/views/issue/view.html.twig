@@ -1,6 +1,7 @@
 {% extends 'BugTrackerBundle::base.html.twig' %}
 {% import 'BugTrackerBundle:activity:macros.html.twig' as activityMacros %}
 
+{% block title %}[{{ issue.code }}] | {{ issue.summary[:40] }}... {% endblock %}
 {% block body %}
     <div id="container">
         <div id="issueWrapper">

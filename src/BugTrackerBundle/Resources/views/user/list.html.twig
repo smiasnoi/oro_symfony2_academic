@@ -1,10 +1,12 @@
 {% extends 'BugTrackerBundle::base.html.twig' %}
 {% import 'BugTrackerBundle::pagination.html.twig' as pagination %}
 
+{% block title %}Users list{% endblock %}
 {% block body %}
     <div id="container">
         <!-- grid content -->
         <div id="userGridWrapper table-responsive">
+            <h2>Users</h2>
             <table class="itemsGrid table tabled-bordered table-striped">
                 <thead>
                 <tr>
@@ -21,10 +23,9 @@
                             <td>{{ user.fullname|e }}</td>
                             <td>{{ user.email|e }}</td>
                             <td>
-                                {% if is_granted('ROLE_ADMIN') %}
-                                    <a href="{{ path('user_edit', {'id': user.id}) }}">Edit</a>
-                                {% else %}
-                                    -
+                                <a href="{{ path('user_view', {'id': user.id}) }}">View</a>
+                                {% if is_granted('ROLE_ADMIN') %} |
+                                <a href="{{ path('user_edit', {'id': user.id}) }}">Edit</a>
                                 {% endif %}
                             </td>
                         </tr>
