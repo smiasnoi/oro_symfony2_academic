@@ -19,3 +19,11 @@ $(document).ready(function() {
         $(".btn-comment").show();
     });
 });
+
+// Select2 jQuery plugin routines initializing
+$(document).ready(function() {
+    var __select2Routines = window.__select2Routines || [], i;
+    for (i = 0; i < __select2Routines.length; i++) {
+        __select2Routines[i]();
+    }
+});

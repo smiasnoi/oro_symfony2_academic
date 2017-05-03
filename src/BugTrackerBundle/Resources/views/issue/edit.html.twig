@@ -1,0 +1,65 @@
+{% extends 'BugTrackerBundle::base.html.twig' %}
+{% import 'BugTrackerBundle:issue:assignee.html.twig' as assigneeWidgets %}
+
+{% block title %}Edit issue {{ issue.code }}|{{ issue.summary[:50] }} {% endblock %}
+{% block body_class %}centered-body{% endblock %}
+{% block body %}
+    <div class="vertical-center">
+        <div class="jumbotron col-sm-9 form-horizontal">
+            {{ form_start(form, {'attr': {'id': 'issueForm'}}) }}
+            {{ form_errors(form) }}
+            <div class="form-group">
+                <div class="col-sm-3 control-label">
+                    {{ form_label(form.summary) }}
+                </div>
+                <div class="col-sm-9">
+                    {{ form_errors(form.summary) }}
+                    {{ form_widget(form.summary, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-3 control-label">
+                    {{ form_label(form.type) }}
+                </div>
+                <div class="col-sm-9">
+                    {{ form_errors(form.type) }}
+                    {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-3 control-label">
+                    {{ form_label(form.priority) }}
+                </div>
+                <div class="col-sm-9">
+                    {{ form_errors(form.priority) }}
+                    {{ form_widget(form.priority, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-3 control-label">
+                    {{ form_label(form.assignee) }}
+                </div>
+                <div class="col-sm-9">
+                    {{ form_errors(form.assignee) }}
+                    {{ form_widget(form.assignee, {'attr': {'class': 'form-control assignee-selection'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-3 control-label">
+                    {{ form_label(form.description) }}
+                </div>
+                <div class="col-sm-9">
+                    {{ form_errors(form.description) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    {{ form_widget(form.update, {'attr': {'class': 'btn btn-default'}}) }}
+                </div>
+            </div>
+            {{ form_end(form) }}
+            {{ assigneeWidgets.renderAssigneeSelect2Js(path('users_ajax_search'), 300) }}
+        </div>
+    </div>
+{% endblock %}

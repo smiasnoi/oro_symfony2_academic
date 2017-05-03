@@ -281,4 +281,44 @@ class UserController extends Controller
             ]
         );
     }
+
+    /**
+     * @Route("/user/ajaxSearch", name="users_ajax_search")
+     * @Method({"GET"})
+     */
+    public function ajaxSearchAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+
+        $page = (int)$request->query->get('p') ?: 1;
+        $offset = ($page - 1) * self::USERS_PAGE_SIZE;
+
+        $users = $em->createQueryBuilder();
+        $users->select('u')->from('BugTrackerBundle:User', 'u')
+            ->orderBy('u.id', 'DESC')
+            ->setMaxResults(self::USERS_PAGE_SIZE)
+            ->setFirstResult($offset);
+        if ($criteria = trim($request->query->get('q'))) {
+            $criteria = '%' . preg_replace('/\s+/', '%', $criteria) . '%';
+            $users->where(
+                'u.fullname like :criteria or u.email like :criteria or u.username like :criteria'
+            )->setParameter('criteria', $criteria);
+        }
+        $filteredUsers = $users->getQuery()->getResult();
+
+        $data = [];
+        foreach ($filteredUsers as $user) {
+            $data[] = [
+                'id' => $user->getId(),
+                'fullname' => htmlspecialchars($user->getFullname()),
+                'email' => htmlspecialchars($user->getEmail())
+            ];
+        }
+
+        return new Response(
+            json_encode($data),
+            200,
+            array('Content-Type' => 'application/json')
+        );
+    }
 }

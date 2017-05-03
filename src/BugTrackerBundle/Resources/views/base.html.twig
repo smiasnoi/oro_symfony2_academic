@@ -7,7 +7,12 @@
             {% stylesheets '@BugTrackerBundle/Resources/assets/bootstrap/css/*'%}
             <link rel="stylesheet" href="{{ asset_url }}" />
             {% endstylesheets %}
-
+            {% stylesheets
+                '@BugTrackerBundle/Resources/assets/select2/css/select2.min.css'
+            '@BugTrackerBundle/Resources/assets/select2/css/select2-bootstrap.min.css'
+            %}
+            <link rel="stylesheet" href="{{ asset_url }}" />
+            {% endstylesheets %}
             {% stylesheets '@BugTrackerBundle/Resources/assets/custom/css/*'%}
                 <link rel="stylesheet" href="{{ asset_url }}" />
             {% endstylesheets %}
@@ -60,6 +65,9 @@
                 <script type="text/javascript" src="{{ asset_url }}" ></script>
                 {% endjavascripts %}
                 {% javascripts '@BugTrackerBundle/Resources/assets/bootstrap/js/bootstrap.min.js' %}
+                <script type="text/javascript" src="{{ asset_url }}" ></script>
+                {% endjavascripts %}
+                {% javascripts '@BugTrackerBundle/Resources/assets/select2/js/*' %}
                 <script type="text/javascript" src="{{ asset_url }}" ></script>
                 {% endjavascripts %}
                 {% javascripts '@BugTrackerBundle/Resources/assets/custom/js/*' %}

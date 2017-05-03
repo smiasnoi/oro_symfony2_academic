@@ -12,6 +12,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use BugTrackerBundle\Form\Issue\EditType as IssueForm;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use BugTrackerBundle\Helper\Pagination;
 
 class IssueController extends Controller
@@ -85,15 +87,91 @@ class IssueController extends Controller
     }
 
     /**
+     * @Route("/issue/new/", name="issue_new")
+     * @Method({"GET", "POST"})
+     */
+    public function createAction(Request $request)
+    {
+        $issue = new Issue();
+        $form = $this->createForm(
+            IssueForm::class, $issue,
+            ['validation_groups' => [], 'required' => false]
+        );
+        $form->add('create', SubmitType::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getEntityManager();
+            $issue->setCode('IACD-' . uniqid()) // @TODO bind to project code
+                ->setStatus('new')
+                ->setReporter($this->getUser())
+                ->addCollaborator($this->getUser())
+                ->addCollaborator($issue->getAssignee())
+                ->setCreatedAt(new \DateTime())
+                ->setUpdatedAt(new \DateTime());
+            $em->persist($issue);
+            $em->flush();
+
+            // adding 'new issue' activity
+            $activity = new Activity();
+            $snappedData = ['issue_code' => $issue->getCode()];
+            $activity->setProject(null) // @TODO bind to project code
+                ->setUser($this->getUser())
+                ->setEntityId($issue->getId())
+                ->setEntity('Issue')
+                ->setSnappedData($snappedData)
+                ->setType(Activity::NEW_ISSUE_TYPE)
+                ->setCreatedAt(new \DateTime());
+            $em->persist($activity);
+            $em->flush();
+
+            return $this->redirectToRoute('issue_view', ['id' => $issue->getId()]);
+        }
+
+        return $this->render(
+            'BugTrackerBundle:issue:new.html.twig',
+            [
+                'form' => $form->createView(),
+                'route_group' => 'issues'
+            ]
+        );
+    }
+
+    /**
      * @Route("/issue/edit/{id}", name="issue_edit", requirements={
      *     "id": "\d+"
      * })
      * @Method({"GET", "POST"})
      */
-    public function editAction(Issue $issue)
+    public function editAction(Request $request, Issue $issue)
     {
-        // @TODO implement new issue form for storie's subtask creation
-        return new Response();
+        $prevAssignee = $issue->getAssignee();
+
+        $form = $this->createForm(
+            IssueForm::class, $issue,
+            ['validation_groups' => [], 'required' => false]
+        );
+        $form->add('update', SubmitType::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getEntityManager();
+            $issue->setCode('IACD-' . uniqid()) // @TODO bind to project code
+                ->addCollaborator($issue->getAssignee())
+                ->removeCollaborator($prevAssignee)
+                ->setUpdatedAt(new \DateTime());
+            $em->persist($issue);
+            $em->flush();
+
+            return $this->redirectToRoute('issue_view', ['id' => $issue->getId()]);
+        }
+
+        return $this->render(
+            'BugTrackerBundle:issue:edit.html.twig',
+            [
+                'issue' => $issue,
+                'form' => $form->createView(),
+                'route_group' => 'issues'
+            ]
+        );
     }
 
     /**

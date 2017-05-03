@@ -1,0 +1,43 @@
+{% macro renderAssigneeSelect2Js(url, delay) %}
+<script type="text/javascript">
+    var __select2Routines = __select2Routines || [];
+    __select2Routines.push(function() {
+        $(".assignee-selection").select2({
+            ajax: {
+                url: "{{ url }}",
+                dataType: 'json',
+                delay: {{ delay }},
+                data: function (params) {
+                    return {
+                        q: params.term, // search term
+                        p: params.page
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+
+                    return {
+                        results: data,
+                        pagination: {
+                            more: data.length
+                        }
+                    };
+                },
+                cache: true
+            },
+            minimumInputLength: 1,
+            templateResult: function(data) {
+                return data.fullname + ' (' + data.email + ')';
+            },
+            templateSelection: function(data) {
+                return data.fullname;
+            },
+            placeholder: {
+                id: '-1',
+                text: 'Select an assignee'
+            },
+            theme: 'bootstrap'
+        });
+    });
+</script>
+{% endmacro %}

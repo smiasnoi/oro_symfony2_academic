@@ -476,6 +476,8 @@ class Issue
     public function removeCollaborator(\BugTrackerBundle\Entity\User $collaborator)
     {
         $this->collaborators->removeElement($collaborator);
+
+        return $this;
     }
 
     /**
