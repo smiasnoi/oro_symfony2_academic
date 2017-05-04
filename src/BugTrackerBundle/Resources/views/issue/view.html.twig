@@ -16,7 +16,9 @@
                         <a href="{{ path('issue_edit', {'id': issue.id}) }}" class="btn btn-default navbar-btn">Edit</a>
                         {% endif %}
                         <a href="#commentFormWrapper" class="btn btn-default btn-comment navbar-btn">Comment</a>
-                        <a href="#" class="btn btn-default navbar-btn">Change Status</a>
+                        {% for status_code, status_name in statuses_to_change %}
+                            <a href="{{ path('issue_change_status', {'id': issue.id, 'status': status_code}) }}" class="btn btn-default navbar-btn">Set status to "{{ status_name }}"</a>
+                        {% endfor %}
                         {% if issue.type == 'story' %}
                             <a href="{{ path('new_story_subtask', {'id': issue.id}) }}" class="btn btn-default navbar-btn">Create Subtask</a>
                         {% endif %}
@@ -116,11 +118,19 @@
                             <ul class="comments list-unstyled">
                             {% for comment in comments %}
                                 <li>
-                                    {% if loop.first == false %}<hr />{% endif %}
-                                    <a class="user-link" target="_blank" href="{{ path('user_view', {'id': comment.author.id}) }}">
-                                        {{ comment.author.fullname }}
-                                    </a>
-                                    <p class="body">{{ comment.body|nl2br }}</p>
+                                    <div class="details">
+                                        {% if loop.first == false %}<hr />{% endif %}
+                                        <a class="user-link" target="_blank" href="{{ path('user_view', {'id': comment.author.id}) }}">
+                                            {{ comment.author.fullname }}
+                                        </a>
+                                        <p class="body">{{ comment.body|nl2br }}</p>
+                                    </div>
+                                    {% if is_granted('ROLE_ADMIN') or app.user.id == comment.author.id %}
+                                    <div class="actions">
+                                        <a href="{{ path('comment_edit', {'id': comment.id }) }}" data-toggle="modal" data-target="#commentModal">Edit</a> |
+                                        <a href="{{ path('comment_delete', {'id': comment.id }) }}" data-toggle="modal" data-target="#commentModal">Delete</a>
+                                    </div>
+                                    {% endif %}
                                 </li>
                             {% endfor %}
                             </ul>
@@ -143,10 +153,11 @@
                     </div>
 
                     <div id="commentFormWrapper" class="collapse panel-body form-horizontal">
+                        <h4>Comment</h4>
                         {{ form_start(comment_form, {'attr': {'id': 'commentForm'}}) }}
                         <div class="form-group">
                             <div class="col-sm-8">
-                                {{ form_widget(comment_form.body, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_widget(comment_form.body, {'attr': {'class': 'form-control', 'rows': 7}}) }}
                             </div>
                         </div>
                         <div class="form-group">
@@ -157,6 +168,13 @@
                         </div>
                         {{ form_end(comment_form) }}
                     </div>
+
+                    <div id="commentModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content"></div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

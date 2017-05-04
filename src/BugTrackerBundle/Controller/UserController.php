@@ -5,7 +5,6 @@ namespace BugTrackerBundle\Controller;
 use BugTrackerBundle\Repository\UserRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Doctrine\Common\Collections\Criteria;
 use BugTrackerBundle\Helper\Pagination;
 
-class UserController extends Controller
+class UserController extends AbstractController
 {
     const SUBMITTED_USER_PASSWORD_MIN_LENGTH = 7;
 
@@ -196,7 +195,7 @@ class UserController extends Controller
 
     /**
      * @Route("/user/edit/{id}", name="user_edit", requirements={
-     *     "userId": "\d+"
+     *     "id": "\d+"
      * })
      * @Method({"GET", "POST"})
      *
@@ -207,9 +206,7 @@ class UserController extends Controller
     public function editAction(Request $request, User $user)
     {
         // checking access
-        if (!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getId() != $user->getId()) {
-            throw $this->createAccessDeniedException('Unable to access this page!');
-        }
+        $this->roleOrEntityOwnerAccessCheck('ROLE_ADMIN', $user);
 
         if ($this->getUser()->getId() != $user->getId()) {
             $validationGroups = ['user_edit'];

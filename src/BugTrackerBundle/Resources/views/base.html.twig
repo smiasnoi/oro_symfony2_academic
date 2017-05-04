@@ -9,7 +9,7 @@
             {% endstylesheets %}
             {% stylesheets
                 '@BugTrackerBundle/Resources/assets/select2/css/select2.min.css'
-            '@BugTrackerBundle/Resources/assets/select2/css/select2-bootstrap.min.css'
+                '@BugTrackerBundle/Resources/assets/select2/css/select2-bootstrap.min.css'
             %}
             <link rel="stylesheet" href="{{ asset_url }}" />
             {% endstylesheets %}
@@ -33,7 +33,17 @@
                         </div>
                         <ul class="nav navbar-nav">
                             <li{% if route_group == "dashboard" %} class="active"{% endif %}><a href="{{ path('dashboard') }}">Dashboard</a></li>
-                            <li{% if route_group == "projects" %} class="active"{% endif %}><a href="{{ path('projects_list') }}">Projects</a></li>
+                            <li{% if route_group == "projects" %} class="active"{% endif %}>
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                    Projects<span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{{ path('projects_list') }}">List</a></li>
+                                    {% if is_granted('ROLE_MANAGER') %}
+                                        <li><a href="{{ path('project_new') }}">New</a></li>
+                                    {% endif %}
+                                </ul>
+                            </li>
                             <li{% if route_group == "issues" %} class="active"{% endif %}><a href="{{ path('issues_list') }}">Issues</a></li>
                             <li{% if route_group == "users" %} class="active"{% endif %}>
                                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
@@ -64,7 +74,10 @@
                 {% javascripts '@BugTrackerBundle/Resources/assets/jquery/js/*' %}
                 <script type="text/javascript" src="{{ asset_url }}" ></script>
                 {% endjavascripts %}
-                {% javascripts '@BugTrackerBundle/Resources/assets/bootstrap/js/bootstrap.min.js' %}
+                {% javascripts
+                    '@BugTrackerBundle/Resources/assets/bootstrap/js/bootstrap.min.js'
+                    '@BugTrackerBundle/Resources/assets/bootstrap/js/bootstrapvalidator.min.js'
+                %}
                 <script type="text/javascript" src="{{ asset_url }}" ></script>
                 {% endjavascripts %}
                 {% javascripts '@BugTrackerBundle/Resources/assets/select2/js/*' %}

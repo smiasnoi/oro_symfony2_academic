@@ -6,12 +6,13 @@ use BugTrackerBundle\Entity\Project;
 use Doctrine\Common\Collections\Criteria;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\BrowserKit\Response;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use BugTrackerBundle\Helper\Pagination;
+use BugTrackerBundle\Form\Project\EditType as ProjectForm;
 
-class ProjectController extends Controller
+class ProjectController extends AbstractController
 {
     CONST ACTIVITIES_PAGE_SIZE = 10;
     CONST ACTIVITIES_PAGE_VAR = 'acp';
@@ -30,6 +31,8 @@ class ProjectController extends Controller
      */
     public function viewAction(Request $request, Project $project)
     {
+        $this->checkIfUserCanHandleProject('ROLE_MANAGER', $project);
+
         $queryParams = (array)$request->query->all();
         $queryParams['id'] = $project->getId();
         $helper = new Pagination($this->container, $request);
@@ -84,13 +87,38 @@ class ProjectController extends Controller
 
     /**
      * @Route("/project/new", name="project_new")
+     * @Method({"GET", "POST"})
+     *
      * @param Request $request
      * @return Response
      */
     public function createAction(Request $request)
     {
-        // @TODO implement new issue form for storie's subtask creation
-        return new Response();
+        $project = new Project();
+        $this->checkIfUserCanHandleProject('ROLE_MANAGER', $project);
+
+        $form = $this->createForm(
+            ProjectForm::class, $project,
+            ['validation_groups' => [], 'required' => false]
+        );
+        $form->add('create', SubmitType::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getEntityManager();
+            $project->addMember($this->getUser());
+            $em->persist($project);
+            $em->flush();
+
+            return $this->redirectToRoute('project_view', ['id' => $project->getId()]);
+        }
+
+        return $this->render(
+            'BugTrackerBundle:project:new.html.twig',
+            [
+                'form' => $form->createView(),
+                'route_group' => 'projects'
+            ]
+        );
     }
 
     /**
@@ -105,6 +133,11 @@ class ProjectController extends Controller
 
         $projects = $em->createQueryBuilder();
         $projects->select('p')->from('BugTrackerBundle:Project', 'p');
+        if (!$this->isGranted('ROLE_MANAGER')) {
+            $projects->innerJoin('p.members', 'm')
+                ->where('m.id=:user_id')
+                ->setParameter('user_id', $this->getUser()->getId());
+        }
         $projectsTotalsQb = clone $projects;
         $totalProjectsItems = $projectsTotalsQb->select('COUNT(p)')
             ->getQuery()
@@ -114,6 +147,7 @@ class ProjectController extends Controller
         $offset = self::PROJECTS_PAGE_SIZE * ($projectsPagesInfo['current_page'] - 1);
         $filteredProjects = $projects->setMaxResults(self::PROJECTS_PAGE_SIZE)
             ->setFirstResult($offset)
+            ->orderBy('p.id', 'DESC')
             ->getQuery()
             ->getResult();
 

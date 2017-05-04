@@ -142,9 +142,9 @@ class Issue
     static public function getPriorities()
     {
         return [
+            'low' => 'Low',
             'minor' => 'Minor',
             'major' => 'Major',
-            'low' => 'Low',
             'critical' => 'Critical'
         ];
     }
@@ -157,7 +157,6 @@ class Issue
     {
         return [
             'new' => 'New',
-            'open' => 'Open',
             'reopened' => 'Reopened',
             'in_porgress' => 'In progress',
             'closed' => 'Closed'

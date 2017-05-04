@@ -20,6 +20,11 @@ $(document).ready(function() {
     });
 });
 
+// modal content clear
+$(document).on("hidden.bs.modal", function (e) {
+    $(e.target).removeData("bs.modal").find(".modal-content").empty();
+});
+
 // Select2 jQuery plugin routines initializing
 $(document).ready(function() {
     var __select2Routines = window.__select2Routines || [], i;
