@@ -2,7 +2,14 @@
 {% import 'BugTrackerBundle:issue:assignee.html.twig' as assigneeWidgets %}
 
 {% block title %}Create issue{% endblock %}
+
+{% block header %}
+    {% set route_group = 'issues' %}
+    {{ parent() }}
+{%  endblock %}
+
 {% block body_class %}centered-body{% endblock %}
+
 {% block body %}
     <div class="vertical-center">
         <div class="jumbotron col-sm-9 form-horizontal">

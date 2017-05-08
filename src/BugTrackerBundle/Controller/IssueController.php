@@ -5,6 +5,7 @@ namespace BugTrackerBundle\Controller;
 use BugTrackerBundle\Entity\Activity;
 use BugTrackerBundle\Entity\Comment;
 use BugTrackerBundle\Entity\Issue;
+use BugTrackerBundle\Repository\IssueRepository;
 use BugTrackerBundle\Entity\Project;
 use Doctrine\Common\Collections\Criteria;
 use BugTrackerBundle\Form\Issue\CommentType;
@@ -15,22 +16,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use BugTrackerBundle\Form\Issue\EditType as IssueForm;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use BugTrackerBundle\Helper\Pagination;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class IssueController extends AbstractController
+class IssueController extends Controller
 {
-    CONST ISSUES_PAGE_SIZE = 16;
-    CONST ISSUES_PAGE_VAR = 'isp';
-
     /**
      * @Route("/issue/{id}", name="issue_view", requirements={
      *     "id": "\d+"
      * })
-     * @Method({"GET", "POST"})
      */
     public function viewAction(Request $request, Issue $issue)
     {
-        $this->checkIfUserCanHandleIssue('ROLE_MANAGER', $issue);
+        //$this->checkIfUserCanHandleIssue('ROLE_MANAGER', $issue);
 
         $comment = new Comment();
         $comment->setAuthor($this->getUser())
@@ -77,7 +74,6 @@ class IssueController extends AbstractController
         $criteria = new Criteria();
         $criteria->orderBy(['createdAt' => Criteria::DESC]);
         $comments = $issue->getComments()->matching($criteria);
-        $activities = $issue->getActivities()->matching($criteria);
 
         return $this->render(
             'BugTrackerBundle:issue:view.html.twig',
@@ -85,9 +81,7 @@ class IssueController extends AbstractController
                 'issue' => $issue,
                 'statuses_to_change' => $this->getIssueStatusesToChange($issue),
                 'comments' => $comments,
-                'activities' => $activities,
                 'comment_form' => $form->createView(),
-                'route_group' => 'issues'
             ]
         );
     }
@@ -96,11 +90,10 @@ class IssueController extends AbstractController
      * @Route("/comment/edit/{id}", name="comment_edit", requirements={
      *     "id": "\d+"
      * })
-     * @Method({"GET", "POST"})
      */
     public function editCommentAction(Request $request, Comment $comment)
     {
-        $this->roleOrEntityOwnerAccessCheck('ROLE_MANAGER', $comment->getAuthor());
+        //$this->roleOrEntityOwnerAccessCheck('ROLE_MANAGER', $comment->getAuthor());
 
         $form = $this->createForm(
             CommentType::class, $comment,
@@ -135,11 +128,10 @@ class IssueController extends AbstractController
      * @Route("/comment/delete/{id}", name="comment_delete", requirements={
      *     "id": "\d+"
      * })
-     * @Method({"GET", "POST"})
      */
     public function deleteCommentAction(Request $request, Comment $comment)
     {
-        $this->roleOrEntityOwnerAccessCheck('ROLE_MANAGER', $comment->getAuthor());
+        //$this->roleOrEntityOwnerAccessCheck('ROLE_MANAGER', $comment->getAuthor());
 
         $form = $this->createFormBuilder()
             ->add('delete', SubmitType::class)
@@ -170,11 +162,10 @@ class IssueController extends AbstractController
      * @Route("/issue/new/{id}", name="issue_new", requirements={
      *     "id": "\d+"
      * }))
-     * @Method({"GET", "POST"})
      */
     public function createAction(Request $request, Project $project)
     {
-        $this->checkIfUserCanHandleProject('ROLE_MANAGER', $project);
+        //$this->checkIfUserCanHandleProject('ROLE_MANAGER', $project);
 
         $issue = new Issue();
         $form = $this->createForm(
@@ -229,12 +220,9 @@ class IssueController extends AbstractController
      * @Route("/issue/edit/{id}", name="issue_edit", requirements={
      *     "id": "\d+"
      * })
-     * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, Issue $issue)
     {
-        $this->checkIfUserCanHandleIssue('ROLE_MANAGER', $issue);
-
         $form = $this->createForm(
             IssueForm::class, $issue,
             ['validation_groups' => [], 'required' => false]
@@ -268,11 +256,10 @@ class IssueController extends AbstractController
      * @Route("/issue/change_status/{id}/{status}", name="issue_change_status", requirements={
      *     "id": "\d+"
      * })
-     * @Method({"GET"})
      */
     public function changeStatusAction(Issue $issue, $status)
     {
-        $this->checkIfUserCanHandleIssue('ROLE_MANAGER', $issue);
+        //$this->checkIfUserCanHandleIssue('ROLE_MANAGER', $issue);
 
         $allowedStatuses = $this->getIssueStatusesToChange($issue);
         if (array_key_exists($status, $allowedStatuses)) {
@@ -289,7 +276,6 @@ class IssueController extends AbstractController
      * @Route("/story/new/subtask/{id}", name="new_story_subtask", requirements={
      *     "id": "\d+"
      * })
-     * @Method({"GET"})
      */
     public function createStorySubtaskAction(Issue $story)
     {
@@ -299,40 +285,17 @@ class IssueController extends AbstractController
 
     /**
      * @Route("/issue/list", name="issues_list")
-     * @Method({"GET"})
      */
-    public function listViewAction(Request $request)
+    public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getEntityManager();
-        $helper = new Pagination($this->container, $request);
-
-        $issues = $em->createQueryBuilder();
-        $issues->select('i')->from('BugTrackerBundle:Issue', 'i');
-        if (!$this->isGranted('ROLE_MANAGER')) {
-            $issues->innerJoin('i.collaborators', 'c')
-                ->where('c.id=:user_id')
-                ->setParameter('user_id', $this->getUser()->getId());
-        }
-
-        $issuesTotalsQb = clone $issues;
-        $totalIssueItems = $issuesTotalsQb->select('COUNT(i)')
-            ->getQuery()
-            ->getSingleScalarResult();
-        $totalIssuesPages = ceil($totalIssueItems / self::ISSUES_PAGE_SIZE);
-        $issuesPagesInfo = $helper->getPrevNextUrls(self::ISSUES_PAGE_VAR, $totalIssuesPages, 'issues_list');
-        $offset = self::ISSUES_PAGE_SIZE * ($issuesPagesInfo['current_page'] - 1);
-        $filteredIssues = $issues->setMaxResults(self::ISSUES_PAGE_SIZE)
-            ->setFirstResult($offset)
-            ->orderBy('i.id', 'DESC')
-            ->getQuery()
-            ->getResult();
+        $collaborator = $this->isGranted('ROLE_MANAGER') ? null : $this->getUser();
+        $page = (int)$request->query->get(IssueRepository::PAGE_VAR) ?: 1;
+        $pagination = [IssueRepository::KEY_PAGE => $page];
 
         return $this->render(
             'BugTrackerBundle:issue:list.html.twig',
-            [
-                'issues' => array_merge(['items' => $filteredIssues], $issuesPagesInfo),
-                'route_group' => 'issues'
-            ]
+            ['issues' => $em->getRepository('BugTrackerBundle:Issue')->findAllByCollaborator($collaborator, $pagination)]
         );
     }
 

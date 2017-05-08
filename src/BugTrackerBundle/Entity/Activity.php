@@ -5,7 +5,7 @@ namespace BugTrackerBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="BugTrackerBundle\Repository\ActivityRepository")
  * @ORM\Table(
  *     name="activity",
  *     indexes={

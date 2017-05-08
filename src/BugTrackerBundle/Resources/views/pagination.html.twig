@@ -1,18 +1,19 @@
-{% macro renderNavPanelPattern1(collection) %}
+{% macro renderNavPanelPattern1(collection, route, query_vars) %}
     {% if collection.total_pages > 1  %}
+        {% set pagination = bt_pagination(collection, route, query_vars) %}
     <div class="navPanel">
-        <p class="text-center">Page {{ collection.current_page }} of {{ collection.total_pages }}</p>
+        <p class="text-center">Page {{ collection.page }} of {{ collection.total_pages }}</p>
         <ul class="navButtons pager">
             <li class="prev-link">
-                {% if collection.prev_page_url %}
-                    <a href="{{ collection.prev_page_url }}">&lt;</a>
+                {% if pagination.prev_page_url %}
+                    <a href="{{ pagination.prev_page_url }}">&lt;</a>
                 {% else %}
                     <span class="disabled">&lt;</span>
                 {% endif %}
             </li>
             <li class="next-link">
-                {% if collection.next_page_url %}
-                    <a href="{{ collection.next_page_url }}">&gt;</a>
+                {% if pagination.next_page_url %}
+                    <a href="{{ pagination.next_page_url }}">&gt;</a>
                 {% else %}
                     <span class="disabled">&gt;</span>
                 {% endif %}

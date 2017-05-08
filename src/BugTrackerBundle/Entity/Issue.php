@@ -4,9 +4,10 @@
 namespace BugTrackerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="BugTrackerBundle\Repository\IssueRepository")
  * @ORM\Table(
  *     name="issues",
  *     indexes={
@@ -29,31 +30,37 @@ class Issue
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank()
      */
     private $summary;
 
     /**
      * @ORM\Column(type="string", length=32)
+     * @Assert\NotBlank()
      */
     private $code;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank()
      */
     private $description;
 
     /**
      * @ORM\Column(type="string", length=32)
+     * @Assert\NotBlank()
      */
     private $type;
 
     /**
      * @ORM\Column(type="string", length=32)
+     * @Assert\NotBlank()
      */
     private $priority;
 
     /**
      * @ORM\Column(type="string", length=32)
+     * @Assert\NotBlank()
      */
     private $resolution;
 
@@ -65,12 +72,14 @@ class Issue
     /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="reporter", referencedColumnName="id")
+     * @Assert\NotBlank()
      */
     private $reporter;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="assignee", referencedColumnName="id")
+     * @Assert\NotBlank()
      */
     private $assignee;
 

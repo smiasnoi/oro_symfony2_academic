@@ -5,7 +5,7 @@
             {{ activity.user.fullname }}
         </a>
         commented issue
-        <a class="issue-link" target="_blank" href="{{ path('issue_view', {'id': activity.entityId}) }}">
+        <a class="issue-link" target="_blank" href="{{ path('issue_view', {'id': activity.issue.id}) }}">
             {{ activity.snappedData.issue_code }}
         </a>
     </div>
@@ -34,7 +34,7 @@
             {{ activity.user.fullname }}
         </a>
         changed status of the issue
-        <a class="issue-link" target="_blank" href="{{ path('issue_view', {'id': activity.entityId}) }}">
+        <a class="issue-link" target="_blank" href="{{ path('issue_view', {'id': activity.issue.id}) }}">
             {{ activity.snappedData.issue_code }}
         </a>
         from "{{ activity.snappedData.old_status }}" to "{{ activity.snappedData.status }}"
@@ -73,7 +73,7 @@
 {% macro render_comment_post_for_user(activity) %}
     <div class="line">
         Issue
-        <a class="issue-link" target="_blank" href="{{ path('issue_view', {'id': activity.entityId}) }}">
+        <a class="issue-link" target="_blank" href="{{ path('issue_view', {'id': activity.issue.id}) }}">
             {{ activity.snappedData.issue_code }}
         </a>
         commenting
@@ -98,7 +98,7 @@
 {% macro render_issue_change_status_for_user(activity) %}
     <div class="line">
         Status change of the issue
-        <a class="issue-link" target="_blank" href="{{ path('issue_view', {'id': activity.entityId}) }}">
+        <a class="issue-link" target="_blank" href="{{ path('issue_view', {'id': activity.issue.id}) }}">
             {{ activity.snappedData.issue_code }}
         </a>
         from "{{ activity.snappedData.old_status }}" to "{{ activity.snappedData.status }}"

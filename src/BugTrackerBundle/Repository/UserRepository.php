@@ -1,12 +1,14 @@
 <?php
 namespace BugTrackerBundle\Repository;
 
-use Doctrine\ORM\EntityRepository;
-use Symfony\Component\Form\FormInterface;
+use BugTrackerBundle\Entity\Project;
 use BugTrackerBundle\Entity\User;
+use Doctrine\Common\Collections\Criteria;
 
-class UserRepository extends EntityRepository
+class UserRepository extends Paginated
 {
+    const PAGE_VAR = 'up';
+
     /**
      * @param User $user
      * @return int
@@ -27,6 +29,40 @@ class UserRepository extends EntityRepository
         }
 
         return $query->getSingleScalarResult();
+    }
+
+    /**
+     * @param array $pagination
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
+    public function findAllPaginated($pagination = [])
+    {
+        $qb = $this->createQueryBuilder('u');
+        return $this->getPaginatedResultForQuery($qb, 'u', $pagination);
+    }
+
+    /**
+     * @param Project $project
+     * @param array $pagination
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
+    public function findProjectMembers(Project $project, $pagination = [])
+    {
+        $criteria = new Criteria();
+
+        $pagination = array_merge($this->getDefaultPagination(), $pagination);
+        $page = $pagination[static::KEY_PAGE];
+        $pageSize = $pagination[static::KEY_PAGE_SIZE];
+        $offset = ($page - 1) * $pageSize;
+
+        $items = $project->getMembers();
+        $totalPages = ceil($items->count() / $pageSize);
+        $criteria->setFirstResult($offset)
+            ->setMaxResults($pageSize);
+        $items = $items->matching($criteria);
+
+        $result = [static::KEY_ITEMS => $items, static::KEY_TOTAL_PAGES => $totalPages];
+        return array_merge($result, $pagination);
     }
 
     /**

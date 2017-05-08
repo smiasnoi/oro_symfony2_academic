@@ -3,9 +3,10 @@
 namespace BugTrackerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="BugTrackerBundle\Repository\ProjectRepository")
  * @ORM\Table(name="projects")
  */
 class Project
@@ -19,16 +20,19 @@ class Project
 
     /**
      * @ORM\Column(type="string", length=128)
+     * @Assert\NotBlank()
      */
     private $label;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank()
      */
     private $summary;
 
     /**
      * @ORM\Column(type="string", length=32)
+     * @Assert\NotBlank()
      */
     private $code;
 

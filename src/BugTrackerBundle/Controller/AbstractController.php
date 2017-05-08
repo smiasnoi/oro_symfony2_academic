@@ -47,6 +47,7 @@ class AbstractController extends Controller
      */
     protected function isUserProjectMember(Project $project)
     {
+        print_r([$project->getId()]);
         $em = $this->getDoctrine()->getEntityManager();
 
         return $em->createQueryBuilder()->select('COUNT(p)')

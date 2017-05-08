@@ -2,6 +2,12 @@
 {% import 'BugTrackerBundle::pagination.html.twig' as pagination %}
 
 {% block title %}Issues{% endblock %}
+
+{% block header %}
+    {% set route_group = 'issues' %}
+    {{ parent() }}
+{%  endblock %}
+
 {% block body %}
     <div id="container">
         <!-- grid content -->
@@ -34,7 +40,7 @@
                 {%  endfor %}
                 </tbody>
             </table>
-            {{ pagination.renderNavPanelPattern1(issues) }}
+            {#{ pagination.renderNavPanelPattern1(issues) }#}
         </div>
     </div>
 {% endblock %}

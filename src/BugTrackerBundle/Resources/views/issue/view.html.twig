@@ -2,6 +2,12 @@
 {% import 'BugTrackerBundle:activity:macros.html.twig' as activityMacros %}
 
 {% block title %}[{{ issue.code }}] | {{ issue.summary[:40] }}... {% endblock %}
+
+{% block header %}
+    {% set route_group = 'issues' %}
+    {{ parent() }}
+{%  endblock %}
+
 {% block body %}
     <div id="container">
         <div id="issueWrapper">
@@ -99,6 +105,7 @@
                     </ul>
                     <div class="tab-content panel-body">
                         <div id="issueActivityTab" class="active tab-pane fade in">
+                            {% set activities = bt_issue_activities(issue) %}
                             {% if activities|length %}
                             <ul class="activities list-unstyled">
                                 {% for activity in activities %}

@@ -32,7 +32,6 @@ class UserController extends AbstractController
 
     /**
      * @Route("/user/login", name="login")
-     * @Method({"GET"})
      */
     public function loginAction()
     {
@@ -51,7 +50,6 @@ class UserController extends AbstractController
 
     /**
      * @Route("/user/loginPost", name="loginPost")
-     * @Method({"POST"})
      */
     public function loginPostAction()
     {
@@ -60,7 +58,6 @@ class UserController extends AbstractController
 
     /**
      * @Route("/user/logout", name="logout")
-     * @Method({"GET"})
      */
     public function logoutAction()
     {
@@ -69,7 +66,6 @@ class UserController extends AbstractController
 
     /**
      * @Route("/user/register", name="register")
-     * @Method({"GET", "POST"})
      */
     public function registerAction(Request $request)
     {
@@ -143,24 +139,12 @@ class UserController extends AbstractController
      * @Route("/user/{id}", name="user_view", requirements={
      *     "id": "\d+"
      * })
-     * @Method({"GET"})
      */
     public function viewAction(Request $request, User $user)
     {
         $queryParams = (array)$request->query->all();
         $queryParams['id'] = $user->getId();
         $helper = new Pagination($this->container, $request);
-
-        $criteria = new Criteria();
-
-        $activities = $user->getActivities();
-        $activitiesTotalPages = ceil($activities->count() / self::ACTIVITIES_PAGE_SIZE);
-        $activitiesPagesInfo = $helper->getPrevNextUrls(self::ACTIVITIES_PAGE_VAR, $activitiesTotalPages, 'user_view', $queryParams);
-        $activitiesPage = $activitiesPagesInfo['current_page'];
-        $offset = ($activitiesPage - 1) * self::ACTIVITIES_PAGE_SIZE;
-        $criteria->setFirstResult($offset)
-            ->setMaxResults(self::ACTIVITIES_PAGE_SIZE);
-        $filteredActivities = $activities->matching($criteria);
 
         $em = $this->getDoctrine()->getEntityManager();
         $issuesQb = $em->createQueryBuilder();
@@ -186,7 +170,7 @@ class UserController extends AbstractController
             'BugTrackerBundle:user:view.html.twig',
             [
                 'user' => $user,
-                'activities' => array_merge(['items' => $filteredActivities], $activitiesPagesInfo),
+                'activities' => $this->getUserActivities($user, $helper, $queryParams),
                 'issues' => array_merge(['items' => $filteredIssues], $issuesPagesInfo),
                 'route_group' => 'users'
             ]
@@ -194,10 +178,17 @@ class UserController extends AbstractController
     }
 
     /**
+     * @Route("/", name="dashboard")
+     */
+    public function dashboardAction(Request $request)
+    {
+        return $this->render('BugTrackerBundle::dashboard.html.twig');
+    }
+
+    /**
      * @Route("/user/edit/{id}", name="user_edit", requirements={
      *     "id": "\d+"
      * })
-     * @Method({"GET", "POST"})
      *
      * @param Request $request
      * @param User $user
@@ -249,39 +240,21 @@ class UserController extends AbstractController
 
     /**
      * @Route("/user/list", name="users_list")
-     * @Method({"GET"})
      */
     public function listViewAction(Request $request)
     {
         $em = $this->getDoctrine()->getEntityManager();
-        $helper = new Pagination($this->container, $request);
-
-        $users = $em->createQueryBuilder();
-        $users->select('u')->from('BugTrackerBundle:User', 'u');
-        $usersTotalsQb = clone $users;
-        $totalUserItems = $usersTotalsQb->select('COUNT(u)')
-            ->getQuery()
-            ->getSingleScalarResult();
-        $totalUsersPages = ceil($totalUserItems / self::USERS_PAGE_SIZE);
-        $issuesPagesInfo = $helper->getPrevNextUrls(self::USERS_PAGE_VAR, $totalUsersPages, 'users_list');
-        $offset = self::USERS_PAGE_SIZE * ($issuesPagesInfo['current_page'] - 1);
-        $filteredUsers = $users->setMaxResults(self::USERS_PAGE_SIZE)
-            ->setFirstResult($offset)
-            ->getQuery()
-            ->getResult();
+        $page = (int)$request->query->get(UserRepository::PAGE_VAR) ?: 1;
+        $pagination = [UserRepository::KEY_PAGE => $page];
 
         return $this->render(
             'BugTrackerBundle:user:list.html.twig',
-            [
-                'users' => array_merge(['items' => $filteredUsers], $issuesPagesInfo),
-                'route_group' => 'users'
-            ]
+            ['users' => $em->getRepository('BugTrackerBundle:User')->findAllPaginated($pagination)]
         );
     }
 
     /**
      * @Route("/user/ajaxSearch", name="users_ajax_search")
-     * @Method({"GET"})
      */
     public function ajaxSearchAction(Request $request)
     {

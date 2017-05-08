@@ -3,6 +3,12 @@
 {% import 'BugTrackerBundle::pagination.html.twig' as pagination %}
 
 {% block title %}{{ user.fullname }}'s profile{% endblock %}
+
+{% block header %}
+    {% set route_group = 'users' %}
+    {{ parent() }}
+{%  endblock %}
+
 {% block body %}
 <div id="container">
     <div id="userEditWrapper">

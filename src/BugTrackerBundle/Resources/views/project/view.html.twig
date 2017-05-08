@@ -3,6 +3,13 @@
 {% import 'BugTrackerBundle::pagination.html.twig' as pagination %}
 
 {% block title %}[{{ project.code }}] | {{ project.summary[:40] }}... {% endblock %}
+
+{% block header %}
+    {% set route_group = 'projects' %}
+    {{ parent() }}
+{%  endblock %}
+
+
 {% block body %}
     <div id="container">
         <div id="projectWrapper">
@@ -30,6 +37,7 @@
             </div>
 
             <div class="row">
+                {% set activities = bt_project_activities(project) %}
                 {% if activities|length %}
                 <div class="col-md-8">
                     <div class="panel panel-default">
@@ -46,12 +54,13 @@
                                 </li>
                                 {% endfor %}
                             </ul>
-                            {{ pagination.renderNavPanelPattern1(activities) }}
+                            {{ pagination.renderNavPanelPattern1(activities, "project_view", {"id": project.id}) }}
                         </div>
                     </div>
                 </div>
                 {% endif %}
 
+                {% set members = bt_project_members(project) %}
                 {% if members|length %}
                 <div class="col-md-4">
                     <div class="panel panel-default">
@@ -67,7 +76,7 @@
                                 </li>
                                 {% endfor %}
                             </ul>
-                            {{ pagination.renderNavPanelPattern1(members) }}
+                            {{ pagination.renderNavPanelPattern1(members, "project_view", {"id": project.id}) }}
                         </div>
                     </div>
                 </div>
@@ -76,4 +85,3 @@
         </div>
     </div>
 {% endblock %}
-
