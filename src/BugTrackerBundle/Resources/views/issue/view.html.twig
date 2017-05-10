@@ -132,7 +132,7 @@
                                         </a>
                                         <p class="body">{{ comment.body|nl2br }}</p>
                                     </div>
-                                    {% if is_granted('ROLE_ADMIN') or app.user.id == comment.author.id %}
+                                    {% if is_granted(['edit', 'delete'], comment) %}
                                     <div class="actions">
                                         <a href="{{ path('comment_edit', {'id': comment.id }) }}" data-toggle="modal" data-target="#commentModal">Edit</a> |
                                         <a href="{{ path('comment_delete', {'id': comment.id }) }}" data-toggle="modal" data-target="#commentModal">Delete</a>

@@ -147,7 +147,9 @@ class Project
      */
     public function addMember(\BugTrackerBundle\Entity\User $member)
     {
-        $this->members[] = $member;
+        if (!$this->members->contains($member)) {
+            $this->members[] = $member;
+        }
 
         return $this;
     }
@@ -188,11 +190,11 @@ class Project
     /**
      * Remove activity
      *
-     * @param \BugTrackerBundle\Entity\Activity $acactivity
+     * @param \BugTrackerBundle\Entity\Activity $activity
      */
-    public function removeActivity(\BugTrackerBundle\Entity\Activity $acactivity)
+    public function removeActivity(\BugTrackerBundle\Entity\Activity $activity)
     {
-        $this->activities->removeElement($acactivity);
+        $this->activities->removeElement($activity);
     }
 
     /**

@@ -23,7 +23,7 @@ class ProjectController extends Controller
      */
     public function viewAction(Request $request, Project $project)
     {
-        //$this->checkIfUserCanHandleProject('ROLE_MANAGER', $project);
+        $this->denyAccessUnlessGranted('handle', $project);
         return $this->render('BugTrackerBundle:project:view.html.twig', ['project' => $project]);
     }
 
@@ -44,11 +44,11 @@ class ProjectController extends Controller
     public function createAction(Request $request)
     {
         $project = new Project();
-        $this->checkIfUserCanHandleProject('ROLE_MANAGER', $project);
+        $this->denyAccessUnlessGranted('handle', $project);
 
         $form = $this->createForm(
             ProjectForm::class, $project,
-            ['validation_groups' => [], 'required' => false]
+            ['validation_groups' => ['Default'], 'required' => false]
         );
         $form->add('create', SubmitType::class);
         $form->handleRequest($request);

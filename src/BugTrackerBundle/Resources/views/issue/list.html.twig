@@ -40,8 +40,7 @@
                 {%  endfor %}
                 </tbody>
             </table>
-            {#{ pagination.renderNavPanelPattern1(issues) }#}
+            {{ pagination.renderNavPanelPattern1(issues, 'issues_list', {}) }}
         </div>
     </div>
 {% endblock %}
-

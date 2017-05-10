@@ -9,7 +9,7 @@
     <div id="container">
         <div id="userEditWrapper">
             <ul class="actions">
-                {% if is_granted('ROLE_ADMIN') or (user.id == logged_user.id) %}
+                {% if is_granted('edit', $user) %}
                     <li><a href="{{ path('user_edit', {'id': user.id }) }}">Edit profile</a></li>
                 {% endif %}
             </ul>

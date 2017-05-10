@@ -480,6 +480,7 @@ class Issue
      * Remove collaborators
      *
      * @param \BugTrackerBundle\Entity\User $collaborator
+     * @return Issue
      */
     public function removeCollaborator(\BugTrackerBundle\Entity\User $collaborator)
     {

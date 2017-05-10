@@ -9,7 +9,7 @@
             <h2 class="summary">Dashboard</h2>
 
             <div class="row">
-                {% set activities = bt_ %}
+                {% set activities = bt_user_activities(app.user) %}
                 {% if activities|length %}
                     <div class="col-md-8">
                         <div class="panel panel-default">
@@ -26,7 +26,7 @@
                                         </li>
                                     {% endfor %}
                                 </ul>
-                                {{ pagination.renderNavPanelPattern1(activities) }}
+                                {{ pagination.renderNavPanelPattern1(activities, "dashboard", {}) }}
                             </div>
                         </div>
                     </div>
@@ -52,7 +52,7 @@
                                         </li>
                                     {% endfor %}
                                 </ul>
-                                {{ pagination.renderNavPanelPattern1(issues) }}
+                                {{ pagination.renderNavPanelPattern1(issues, "dashboard", {}) }}
                             </div>
                         </div>
                     </div>

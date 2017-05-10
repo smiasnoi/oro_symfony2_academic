@@ -17,10 +17,8 @@
                     params.page = params.page || 1;
 
                     return {
-                        results: data,
-                        pagination: {
-                            more: data.length
-                        }
+                        results: data.items,
+                        pagination: {more: data.page < data.total_pages}
                     };
                 },
                 cache: true

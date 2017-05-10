@@ -4,6 +4,62 @@ parameters:
     #parameter_name: value
 
 services:
-    #service_name:
-    #    class: AppBundle\Directory\ClassName
-    #    arguments: ['@another_service_name', 'plain_value', '%parameter_name%']
+    bugtracker.user.form_handler:
+        class: BugTrackerBundle\Form\Handler\UserHandler
+        public: true
+        arguments:
+            ["@doctrine.orm.entity_manager", "@security.password_encoder", "@request_stack"]
+    bugtracker.issue.form_handler:
+        class: BugTrackerBundle\Form\Handler\IssueHandler
+        public: true
+        arguments:
+            ["@doctrine.orm.entity_manager", "@request_stack"]
+    bugtracker.activities.twig_extension:
+        class: BugTrackerBundle\Twig\Activity
+        public: false
+        arguments:
+            ["@doctrine.orm.entity_manager", "@request_stack"]
+        tags:
+            - { name: twig.extension }
+    bugtracker.users.twig_extension:
+        class: BugTrackerBundle\Twig\User
+        public: false
+        arguments:
+            ["@doctrine.orm.entity_manager", "@request_stack"]
+        tags:
+            - { name: twig.extension }
+    bugtracker.pagination.twig_extension:
+        class: BugTrackerBundle\Twig\Pagination
+        public: false
+        arguments:
+            ["@request_stack", "@router"]
+        tags:
+            - { name: twig.extension }
+    bugtracker.project_voter:
+        class: BugTrackerBundle\Security\ProjectVoter
+        arguments:
+            ["@doctrine.orm.entity_manager", "@security.access.decision_manager"]
+        tags:
+            - { name: security.voter }
+        public: false
+    bugtracker.issue_voter:
+        class: BugTrackerBundle\Security\IssueVoter
+        arguments:
+            ["@doctrine.orm.entity_manager", "@security.access.decision_manager"]
+        tags:
+            - { name: security.voter }
+        public: false
+    bugtracker.user_voter:
+        class: BugTrackerBundle\Security\UserVoter
+        arguments:
+            ["@security.access.decision_manager"]
+        tags:
+            - { name: security.voter }
+        public: false
+    bugtracker.comment_voter:
+        class: BugTrackerBundle\Security\CommentVoter
+        arguments:
+            ["@security.access.decision_manager"]
+        tags:
+            - { name: security.voter }
+        public: false

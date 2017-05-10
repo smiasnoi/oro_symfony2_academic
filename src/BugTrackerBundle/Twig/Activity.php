@@ -4,6 +4,7 @@ namespace BugTrackerBundle\Twig;
 
 use BugTrackerBundle\Entity\Issue;
 use BugTrackerBundle\Entity\Project;
+use BugTrackerBundle\Entity\User;
 use BugTrackerBundle\Repository\ActivityRepository;
 
 use Doctrine\ORM\EntityManager;
@@ -50,5 +51,17 @@ class Activity extends \Twig_Extension
 
         return $this->em->getRepository('BugTrackerBundle:Activity')
             ->findAllByProject($project, $pagination);
+    }
+
+    /**
+     * @param User $user
+     */
+    public function getUserActivities(User $user)
+    {
+        $page = (int)$this->request->query->get(ActivityRepository::PAGE_VAR) ?: 1;
+        $pagination = [ActivityRepository::KEY_PAGE => $page];
+
+        return $this->em->getRepository('BugTrackerBundle:Activity')
+            ->findAllByUser($user, $pagination);
     }
 }

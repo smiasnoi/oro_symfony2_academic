@@ -27,7 +27,7 @@ class IssueController extends Controller
      */
     public function viewAction(Request $request, Issue $issue)
     {
-        //$this->checkIfUserCanHandleIssue('ROLE_MANAGER', $issue);
+        $this->denyAccessUnlessGranted('handle', $issue);
 
         $comment = new Comment();
         $comment->setAuthor($this->getUser())
@@ -93,7 +93,7 @@ class IssueController extends Controller
      */
     public function editCommentAction(Request $request, Comment $comment)
     {
-        //$this->roleOrEntityOwnerAccessCheck('ROLE_MANAGER', $comment->getAuthor());
+        $this->denyAccessUnlessGranted('edit', $comment);
 
         $form = $this->createForm(
             CommentType::class, $comment,
@@ -117,10 +117,7 @@ class IssueController extends Controller
 
         return $this->render(
             'BugTrackerBundle:issue:comment\edit.html.twig',
-            [
-                'comment' => $comment,
-                'form' => $form->createView(),
-            ]
+            ['comment' => $comment, 'form' => $form->createView()]
         );
     }
 
@@ -131,7 +128,7 @@ class IssueController extends Controller
      */
     public function deleteCommentAction(Request $request, Comment $comment)
     {
-        //$this->roleOrEntityOwnerAccessCheck('ROLE_MANAGER', $comment->getAuthor());
+        $this->denyAccessUnlessGranted('delete', $comment);
 
         $form = $this->createFormBuilder()
             ->add('delete', SubmitType::class)
@@ -151,10 +148,7 @@ class IssueController extends Controller
 
         return $this->render(
             'BugTrackerBundle:issue:comment\delete.html.twig',
-            [
-                'comment' => $comment,
-                'form' => $form->createView(),
-            ]
+            ['comment' => $comment, 'form' => $form->createView()]
         );
     }
 
@@ -165,54 +159,26 @@ class IssueController extends Controller
      */
     public function createAction(Request $request, Project $project)
     {
-        //$this->checkIfUserCanHandleProject('ROLE_MANAGER', $project);
+        $this->denyAccessUnlessGranted('handle', $project);
 
         $issue = new Issue();
+        $issue->setProject($project)
+            ->setReporter($this->getUser());
+
         $form = $this->createForm(
             IssueForm::class, $issue,
             ['validation_groups' => [], 'required' => false]
         );
         $form->add('create', SubmitType::class);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getEntityManager();
-            $issue->setProject($project)
-                ->setCode($project->getCode() . '-' . uniqid())
-                ->setStatus('new')
-                ->setReporter($this->getUser())
-                ->addCollaborator($this->getUser())
-                ->addCollaborator($issue->getAssignee())
-                ->setCreatedAt(new \DateTime())
-                ->setUpdatedAt(new \DateTime());
-            $em->persist($issue);
-            $project->addMember($issue->getAssignee())
-                ->addMember($this->getUser());
-            $em->persist($issue);
-            $em->flush();
 
-            // adding 'new issue' activity
-            $activity = new Activity();
-            $snappedData = ['issue_code' => $issue->getCode()];
-            $activity->setProject($project)
-                ->setUser($this->getUser())
-                ->setEntityId($issue->getId())
-                ->setEntity('Issue')
-                ->setSnappedData($snappedData)
-                ->setType(Activity::NEW_ISSUE_TYPE)
-                ->setCreatedAt(new \DateTime());
-            $em->persist($activity);
-            $em->flush();
-
+        $formHandler = $this->get('bugtracker.issue.form_handler');
+        if ($formHandler->handleCreateForm($form)) {
             return $this->redirectToRoute('issue_view', ['id' => $issue->getId()]);
         }
 
         return $this->render(
             'BugTrackerBundle:issue:new.html.twig',
-            [
-                'form' => $form->createView(),
-                'project' => $project,
-                'route_group' => 'issues'
-            ]
+            ['form' => $form->createView(), 'project' => $project]
         );
     }
 
@@ -244,11 +210,7 @@ class IssueController extends Controller
 
         return $this->render(
             'BugTrackerBundle:issue:edit.html.twig',
-            [
-                'issue' => $issue,
-                'form' => $form->createView(),
-                'route_group' => 'issues'
-            ]
+            ['issue' => $issue, 'form' => $form->createView()]
         );
     }
 
@@ -259,7 +221,7 @@ class IssueController extends Controller
      */
     public function changeStatusAction(Issue $issue, $status)
     {
-        //$this->checkIfUserCanHandleIssue('ROLE_MANAGER', $issue);
+        $this->denyAccessUnlessGranted('handle', $issue);
 
         $allowedStatuses = $this->getIssueStatusesToChange($issue);
         if (array_key_exists($status, $allowedStatuses)) {

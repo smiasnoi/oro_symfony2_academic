@@ -2,7 +2,7 @@
 
 namespace BugTrackerBundle\Twig;
 
-use Symfony\Bundle\FrameworkBundle\Routing\Router;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use BugTrackerBundle\Repository\Paginated;
 
@@ -11,7 +11,7 @@ class Pagination extends \Twig_Extension
     private $request;
     private $router;
 
-    public function __construct(RequestStack $requestStack, Router $router)
+    public function __construct(RequestStack $requestStack, RouterInterface $router)
     {
         $this->request = $requestStack->getCurrentRequest();
         $this->router = $router;

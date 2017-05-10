@@ -35,10 +35,30 @@ class UserRepository extends Paginated
      * @param array $pagination
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
-    public function findAllPaginated($pagination = [])
+    public function findAllPaginated($pagination = [], $filters = [])
     {
         $qb = $this->createQueryBuilder('u');
+        foreach ($filters as $filter => $filterData) {
+            $method = $filter . "Filter";
+            if (method_exists($this, $method)) {
+                $this->$method($qb, $filterData);
+            }
+        }
+
         return $this->getPaginatedResultForQuery($qb, 'u', $pagination);
+    }
+
+    /**
+     * @param $qb
+     * @param $criteria
+     */
+    protected function searchCriteriaFilter($qb, $criteria)
+    {
+        if (trim($criteria)) {
+            $criteria = '%' . preg_replace('/\s+/', '%', trim($criteria)) . '%';
+            $qb->where('u.fullname like :criteria or u.email like :criteria or u.username like :criteria')
+                ->setParameter('criteria', $criteria);
+        }
     }
 
     /**
