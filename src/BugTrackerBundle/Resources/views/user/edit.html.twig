@@ -41,7 +41,7 @@
                     {{ form_widget(form.fullname, {'attr': {'class': 'form-control'}}) }}
                 </div>
             </div>
-            {% if is_granted('ROLE_ADMIN') and app.user.id != user.id %}
+            {% if is_granted('edit_role', user) %}
             <div class="form-group">
                 <div class="col-sm-4 control-label">
                     {{ form_label(form.roles) }}
@@ -70,7 +70,6 @@
                     {{ form_widget(form.cpassword, {'attr': {'class': 'form-control'}}) }}
                 </div>
             </div>
-            {% do form.roles.setRendered %}
             <div class="form-group">
                 <div class="col-sm-offset-4 col-sm-8">
                     {{ form_widget(form.save, {'attr': {'class': 'btn btn-default'}}) }}

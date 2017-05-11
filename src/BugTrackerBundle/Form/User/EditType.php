@@ -17,20 +17,22 @@ class EditType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $user = $options['data'] ?: new UserEntity();
-        $role = current($user->getRoles());
-
         $builder
             ->add('email', EmailType::class)
             ->add('username', TextType::class)
             ->add('fullname', TextType::class)
-            ->add('roles', ChoiceType::class, [
+            ->add('password', PasswordType::class)
+            ->add('cpassword', PasswordType::class, ['label' => 'Repeat password']);
+
+        if (in_array('user_edit', $options['validation_groups'])) {
+            $user = $options['data'] ?: new UserEntity();
+            $role = current($user->getRoles());
+
+            $builder->add('roles', ChoiceType::class, [
                 'choices' => array_flip(UserEntity::availableRoles()),
                 'data' => $role,
                 'choices_as_values' => true
-            ])
-            ->add('password', PasswordType::class)
-            ->add('cpassword', PasswordType::class, ['label' => 'Repeat password'])
-        ;
+            ]);
+        }
     }
 }

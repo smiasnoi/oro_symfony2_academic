@@ -71,6 +71,7 @@ class UserHandler
                 $encodedPassword = $this->encoder->encodePassword($user, $plainPassword);
                 $user->setPassword($encodedPassword);
             }
+
             $this->em->persist($user);
             $this->em->flush($user);
 

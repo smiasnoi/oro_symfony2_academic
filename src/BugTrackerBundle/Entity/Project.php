@@ -32,7 +32,7 @@ class Project
 
     /**
      * @ORM\Column(type="string", length=32)
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(groups="project_create")
      */
     private $code;
 

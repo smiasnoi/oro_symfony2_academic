@@ -4,6 +4,15 @@ parameters:
     #parameter_name: value
 
 services:
+    bugtracker.issue_edit.form_type:
+        class: BugTrackerBundle\Form\Issue\EditType
+        arguments:
+            ["@bugtracker.issue.helper"]
+        tags:
+            - { name: form.type}
+    bugtracker.issue.helper:
+        class: BugTrackerBundle\Helper\Issue
+        public: true
     bugtracker.user.form_handler:
         class: BugTrackerBundle\Form\Handler\UserHandler
         public: true

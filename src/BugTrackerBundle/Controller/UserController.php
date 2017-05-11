@@ -60,7 +60,10 @@ class UserController extends Controller
         $user = new User();
         $form = $this->createForm(
             UserForm::class, $user,
-            ['validation_groups' => ['user_register'], 'required' => false]
+            [
+                'validation_groups' => ['Default', 'user_register'],
+                'required' => false
+            ]
         );
         $form->add('register', SubmitType::class);
 
@@ -123,6 +126,7 @@ class UserController extends Controller
         $this->denyAccessUnlessGranted('edit', $user);
 
         $validationGroups = $this->getUser()->getId() != $user->getId() ? ['user_edit'] : ['profile_edit'];
+        $validationGroups[] = 'Default';
         $form = $this->createForm(
             UserForm::class, $user,
             ['validation_groups' => $validationGroups, 'required' => false]
@@ -167,7 +171,7 @@ class UserController extends Controller
         foreach ($users[UserRepository::KEY_ITEMS] as $user) {
             $hidratedItems[] = [
                 'id' => $user->getId(),
-                'fullname' => htmlspecialchars($user->getFullname()),
+                'text' => htmlspecialchars($user->getFullname()),
                 'email' => htmlspecialchars($user->getEmail())
             ];
         }

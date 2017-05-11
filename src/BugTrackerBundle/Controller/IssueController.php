@@ -25,7 +25,7 @@ class IssueController extends Controller
      *     "id": "\d+"
      * })
      */
-    public function viewAction(Request $request, Issue $issue)
+    public function viewAction(Issue $issue)
     {
         $this->denyAccessUnlessGranted('handle', $issue);
 
@@ -33,41 +33,11 @@ class IssueController extends Controller
         $comment->setAuthor($this->getUser())
             ->setIssue($issue);
 
-        $form = $this->createForm(
-            CommentType::class, $comment,
-            ['validation_groups' => [], 'required' => false]
-        );
+        $form = $this->createForm(CommentType::class, $comment, ['required' => false]);
         $form->add('add', SubmitType::class);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // saving new comment
-            $em = $this->getDoctrine()->getEntityManager();
-            $comment->setCreatedAt(new \DateTime());
-            $em->persist($comment);
-
-            // adding issue collaborator
-            $issue->addCollaborator($this->getUser());
-            $em->persist($issue);
-            $em->flush();
-
-            // adding 'post comment' project activity
-            $activity = new Activity();
-            $snappedData = [
-                'issue_code' => $issue->getCode(),
-                'comment_body' => $comment->getBody()
-            ];
-            $activity->setIssue($issue)
-                ->setProject($issue->getProject())
-                ->setUser($this->getUser())
-                ->setEntityId($issue->getId())
-                ->setEntity('Comment')
-                ->setSnappedData($snappedData)
-                ->setType(Activity::COMMENT_POST_TYPE)
-                ->setCreatedAt(new \DateTime());
-            $em->persist($activity);
-            $em->flush();
-
+        $formHandler = $this->get('bugtracker.issue.form_handler');
+        if ($formHandler->handleCommentPostForm($form)) {
             return $this->redirect($this->generateUrl('issue_view', ['id' => $issue->getId()]));
         }
 
@@ -79,7 +49,7 @@ class IssueController extends Controller
             'BugTrackerBundle:issue:view.html.twig',
             [
                 'issue' => $issue,
-                'statuses_to_change' => $this->getIssueStatusesToChange($issue),
+                'statuses_to_change' => $this->get('bugtracker.issue.helper')->getIssueStatusesToChange($issue),
                 'comments' => $comments,
                 'comment_form' => $form->createView(),
             ]
@@ -91,28 +61,20 @@ class IssueController extends Controller
      *     "id": "\d+"
      * })
      */
-    public function editCommentAction(Request $request, Comment $comment)
+    public function editCommentAction(Comment $comment)
     {
         $this->denyAccessUnlessGranted('edit', $comment);
+        $comment->setAuthor($this->getUser());
 
         $form = $this->createForm(
             CommentType::class, $comment,
-            ['validation_groups' => [], 'required' => false]
+            ['required' => false]
         );
         $form->add('update', SubmitType::class);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // updating comment
-            $em = $this->getDoctrine()->getEntityManager();
-            $em->persist($comment);
-            // adding issue collaborator
-            $issue = $comment->getIssue();
-            $issue->addCollaborator($this->getUser());
-            $em->persist($issue);
-            $em->flush();
-
-            return $this->redirect($this->generateUrl('issue_view', ['id' => $issue->getId()]));
+        $formHandler = $this->get('bugtracker.issue.form_handler');
+        if ($formHandler->handleCommentPostForm($form)) {
+            return $this->redirect($this->generateUrl('issue_view', ['id' => $comment->getIssue()->getId()]));
         }
 
         return $this->render(
@@ -126,24 +88,19 @@ class IssueController extends Controller
      *     "id": "\d+"
      * })
      */
-    public function deleteCommentAction(Request $request, Comment $comment)
+    public function deleteCommentAction(Comment $comment)
     {
         $this->denyAccessUnlessGranted('delete', $comment);
 
         $form = $this->createFormBuilder()
             ->add('delete', SubmitType::class)
             ->add('cancel', ResetType::class)
-            ->getForm();
-        $form->handleRequest($request);
+            ->getForm()
+            ->setData($comment);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // updating comment
-            $em = $this->getDoctrine()->getEntityManager();
-            $issue = $comment->getIssue();
-            $em->remove($comment);
-            $em->flush();
-
-            return $this->redirect($this->generateUrl('issue_view', ['id' => $issue->getId()]));
+        $formHandler = $this->get('bugtracker.issue.form_handler');
+        if ($formHandler->handleCommentDeleteForm($form)) {
+            return $this->redirect($this->generateUrl('issue_view', ['id' => $comment->getIssue()->getId()]));
         }
 
         return $this->render(
@@ -157,7 +114,7 @@ class IssueController extends Controller
      *     "id": "\d+"
      * }))
      */
-    public function createAction(Request $request, Project $project)
+    public function createAction(Project $project)
     {
         $this->denyAccessUnlessGranted('handle', $project);
 
@@ -165,10 +122,7 @@ class IssueController extends Controller
         $issue->setProject($project)
             ->setReporter($this->getUser());
 
-        $form = $this->createForm(
-            IssueForm::class, $issue,
-            ['validation_groups' => [], 'required' => false]
-        );
+        $form = $this->createForm(IssueForm::class, $issue, ['required' => false]);
         $form->add('create', SubmitType::class);
 
         $formHandler = $this->get('bugtracker.issue.form_handler');
@@ -187,24 +141,16 @@ class IssueController extends Controller
      *     "id": "\d+"
      * })
      */
-    public function editAction(Request $request, Issue $issue)
+    public function editAction(Issue $issue)
     {
         $form = $this->createForm(
             IssueForm::class, $issue,
-            ['validation_groups' => [], 'required' => false]
+            ['required' => false]
         );
         $form->add('update', SubmitType::class);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getEntityManager();
-            $issue->addCollaborator($issue->getAssignee())
-                ->setUpdatedAt(new \DateTime());
-            $em->persist($issue);
-            $project = $issue->getProject();
-            $project->addMember($issue->getAssignee());
-            $em->persist($project);
-            $em->flush();
 
+        $formHandler = $this->get('bugtracker.issue.form_handler');
+        if ($formHandler->handleEditForm($form)) {
             return $this->redirectToRoute('issue_view', ['id' => $issue->getId()]);
         }
 
@@ -259,25 +205,5 @@ class IssueController extends Controller
             'BugTrackerBundle:issue:list.html.twig',
             ['issues' => $em->getRepository('BugTrackerBundle:Issue')->findAllByCollaborator($collaborator, $pagination)]
         );
-    }
-
-    /**
-     * @param Issue $issue
-     * @return array
-     */
-    protected function getIssueStatusesToChange(Issue $issue)
-    {
-        switch ($issue->getStatus()) {
-            case 'new':
-            case 'reopened':
-                $allowedStatuses = ['in_progress', 'closed'];
-                break;
-            case 'closed':
-                $allowedStatuses = ['reopened'];
-                break;
-            default:
-                $allowedStatuses = [];
-        }
-        return array_intersect_key(Issue::getStatuses(), array_flip($allowedStatuses));
     }
 }

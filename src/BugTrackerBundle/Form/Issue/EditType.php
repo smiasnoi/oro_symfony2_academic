@@ -13,9 +13,17 @@ use Symfony\Component\Form\FormEvents;
 
 use BugTrackerBundle\Entity\Issue as IssueEntity;
 use BugTrackerBundle\Entity\User as UserEntity;
+use BugTrackerBundle\Helper\Issue as IssueHelper;
 
 class EditType extends AbstractType
 {
+    protected $helper;
+
+    public function __construct(IssueHelper $helper)
+    {
+        $this->helper = $helper;
+    }
+
     /**
      * @param FormBuilderInterface $builder
      * @param array $options

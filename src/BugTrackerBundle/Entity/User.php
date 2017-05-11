@@ -47,12 +47,12 @@ class User implements UserInterface, \Serializable
 
     /**
      * @ORM\Column(type="string", length=128)
-     *
+     * @Assert\NotBlank(groups={"registration"})
      */
     private $password_hash;
 
     /**
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(groups={"registration"})
      */
     private $cpassword;
 

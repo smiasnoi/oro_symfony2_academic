@@ -42,7 +42,7 @@ class UserVoter extends Voter
             case self::EDIT:
                 return $this->canEditProfile($profile, $user, $token);
             case self::EDIT_ROLE:
-                return $this->canEditProfileRole($profile, $user);
+                return $this->canEditProfileRole($profile, $user, $token);
         }
 
         throw new \LogicException('This code should not be reached!');

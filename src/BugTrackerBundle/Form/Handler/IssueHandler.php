@@ -31,23 +31,23 @@ class IssueHandler
     public function handleCreateForm(FormInterface $form)
     {
         $issue = $this->getIssue($form);
+        $project = $issue->getProject();
+        $reporter = $issue->getReporter();
+
+        $issue->setCode($project->getCode() . '-' . uniqid())
+            ->setStatus('new');
 
         $form->handleRequest($this->request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
 
-            $project = $issue->getProject();
-            $reporter = $issue->getReporter();
-
-            $issue->setCode($project->getCode() . '-' . uniqid())
-                ->setStatus('new')
-                ->addCollaborator($reporter)
+            $issue->addCollaborator($reporter)
                 ->addCollaborator($issue->getAssignee())
                 ->setCreatedAt(new \DateTime())
                 ->setUpdatedAt(new \DateTime());
             $em->persist($issue);
             $project->addMember($issue->getAssignee())
-                ->addMember($this->getUser());
+                ->addMember($reporter);
             $em->persist($issue);
             $em->flush();
 
@@ -80,6 +80,105 @@ class IssueHandler
 
         $form->handleRequest($this->request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->em;
+
+            $issue->addCollaborator($issue->getAssignee())
+                ->setUpdatedAt(new \DateTime());
+            $em->persist($issue);
+            $project = $issue->getProject();
+            $project->addMember($issue->getAssignee());
+            $em->persist($project);
+            $em->flush();
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @param FormInterface $form
+     * @return bool
+     */
+    public function handleCommentPostForm(FormInterface $form)
+    {
+        $comment = $this->getComment($form);
+        $issue = $comment->getIssue();
+        $author = $comment->getAuthor();
+
+        $form->handleRequest($this->request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->em;
+
+            $comment->setCreatedAt(new \DateTime());
+            $em->persist($comment);
+
+            $issue->addCollaborator($author);
+            $em->persist($issue);
+            $em->flush();
+
+            $activity = new Activity();
+            $snappedData = [
+                'issue_code' => $issue->getCode(),
+                'comment_body' => $comment->getBody()
+            ];
+            $activity->setIssue($issue)
+                ->setProject($issue->getProject())
+                ->setUser($author)
+                ->setEntityId($issue->getId())
+                ->setEntity('Comment')
+                ->setSnappedData($snappedData)
+                ->setType(Activity::COMMENT_POST_TYPE)
+                ->setCreatedAt(new \DateTime());
+            $em->persist($activity);
+            $em->flush();
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @param FormInterface $form
+     * @return bool
+     */
+    public function handleCommentEditForm(FormInterface $form)
+    {
+        $comment = $this->getComment($form);
+        $author = $comment->getAuthor();
+
+        $form->handleRequest($this->request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->em;
+
+            $em = $this->getDoctrine()->getEntityManager();
+            $em->persist($comment);
+
+            $issue = $comment->getIssue();
+            $issue->addCollaborator($author);
+            $em->persist($issue);
+            $em->flush();
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @param FormInterface $form
+     * @return bool
+     */
+    public function handleCommentDeleteForm(FormInterface $form)
+    {
+        $comment = $this->getComment($form);
+
+        $form->handleRequest($this->request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->em->remove($comment);
+            $this->em->flush();
+
             return true;
         } else {
             return false;

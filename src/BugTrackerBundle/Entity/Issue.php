@@ -59,13 +59,14 @@ class Issue
     private $priority;
 
     /**
-     * @ORM\Column(type="string", length=32)
-     * @Assert\NotBlank()
+     * @ORM\Column(type="string", length=32, nullable=true)
+     * @Assert\NotBlank(groups={"bug_fix"})
      */
     private $resolution;
 
     /**
      * @ORM\Column(type="string", length=32)
+     * @Assert\NotBlank()
      */
     private $status;
 
@@ -167,8 +168,9 @@ class Issue
         return [
             'new' => 'New',
             'reopened' => 'Reopened',
-            'in_porgress' => 'In progress',
-            'closed' => 'Closed'
+            'in_progress' => 'In progress',
+            'closed' => 'Closed',
+            'resolved' => 'Resolved'
         ];
     }
 

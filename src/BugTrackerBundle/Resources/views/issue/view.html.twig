@@ -62,7 +62,7 @@
 
             <div class="panel panel-default">
                 <div class="panel-heading"><strong>Description</strong></div>
-                <p class="description panel-body">{{ issue.description }}</p>
+                <p class="description panel-body">{{ issue.description|nl2br }}</p>
             </div>
 
             {% if issue.children|length %}
