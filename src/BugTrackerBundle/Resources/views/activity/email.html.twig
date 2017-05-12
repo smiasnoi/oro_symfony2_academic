@@ -1,0 +1,5 @@
+{% import 'BugTrackerBundle:activity:macros.html.twig' as activityMacros %}
+{% set targetActivityRenderer =  'render_' ~ activity.type ~ '_for_email' %}
+{% if attribute(activityMacros, targetActivityRenderer) is defined %}
+    {{ attribute(activityMacros, targetActivityRenderer, {'activity': activity}) }}
+{% endif %}

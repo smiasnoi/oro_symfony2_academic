@@ -6,10 +6,6 @@ use BugTrackerBundle\Entity\Issue as IssueEntity;
 
 class Issue
 {
-    public function __construct()
-    {
-    }
-
     /**
      * Issue statuses vocabulary
      * @return array
@@ -26,6 +22,21 @@ class Issue
     }
 
     /**
+     * Issue types vocabulary
+     * @return array
+     */
+    protected function getAllTypes()
+    {
+        return [
+            'bug' => 'Bug',
+            'subtask' =>'Subtask',
+            'story_bug' =>'Story Bug',
+            'task' => 'Task',
+            'story' => 'Story'
+        ];
+    }
+
+    /**
      * @param string $code
      * @return string
      */
@@ -36,7 +47,7 @@ class Issue
     }
 
     /**
-     * @param Issue $issue
+     * @param IssueEntity $issue
      * @return array
      */
     public function getIssueStatusesToChange(IssueEntity $issue)
@@ -49,6 +60,7 @@ class Issue
                 $allowedStatuses = ['in_progress', 'closed'];
                 break;
             case 'closed':
+            case 'resolved':
                 $allowedStatuses = ['reopened'];
                 break;
             case 'in_progress':
@@ -59,5 +71,34 @@ class Issue
         }
 
         return array_intersect_key($allStatuses, array_flip($allowedStatuses));
+    }
+
+    /**
+     * @param IssueEntity $issue
+     * @return array
+     */
+    public function getIssueTypesToChange(IssueEntity $issue)
+    {
+        $allTypes = $this->getAllTypes();
+        switch ($issue->getType()) {
+            case 'bug':
+                $allowedTypes = ['task', 'story'];
+                break;
+            case 'subtask':
+                $allowedTypes = ['story_bug'];
+                break;
+            default:
+                $allowedTypes = !$issue->getParent() ? ['bug', 'task', 'story'] : [];
+        }
+
+        return array_intersect_key($allTypes, array_flip($allowedTypes));
+    }
+
+    /**
+     * @return string
+     */
+    public function getSubtaskType()
+    {
+        return 'subtask';
     }
 }

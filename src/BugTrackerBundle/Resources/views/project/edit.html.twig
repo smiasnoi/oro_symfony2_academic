@@ -1,28 +1,43 @@
 {% extends 'BugTrackerBundle::base.html.twig' %}
 
+{% block title %}Edit project {{ project.code }}|{{ project.summary[:50] }}{% endblock %}
+
 {% block header %}
     {% set route_group = 'projects' %}
     {{ parent() }}
 {%  endblock %}
 
-{% block body %}
-    <div id="container">
-        <div id="userEditWrapper">
-            <ul class="actions">
-                {% if is_granted('edit', $user) %}
-                    <li><a href="{{ path('user_edit', {'id': user.id }) }}">Edit profile</a></li>
-                {% endif %}
-            </ul>
+{% block body_class %}centered-body{% endblock %}
 
-            <div class="headedContainer">
-                <h2 class="heading">Details</h2>
-                <dl class="details">
-                    <dt>Username</dt><dd>{{ user.username }}</dd>
-                    <dt>Fullname</dt><dd>{{ user.fullname }}</dd>
-                    <dt>Email</dt><dd>{{ user.email }}</dd>
-                    <dt>Roles</dt><dd>{{ user.roles|join(', ') }}</dd>
-                </dl>
+{% block body %}
+    <div class="vertical-center">
+        <div class="jumbotron col-sm-9 form-horizontal">
+            {{ form_start(form, {'attr': {'id': 'issueForm'}}) }}
+            {{ form_errors(form) }}
+            <div class="form-group">
+                <div class="col-sm-3 control-label">
+                    {{ form_label(form.label) }}
+                </div>
+                <div class="col-sm-9">
+                    {{ form_errors(form.label) }}
+                    {{ form_widget(form.label, {'attr': {'class': 'form-control'}}) }}
+                </div>
             </div>
+            <div class="form-group">
+                <div class="col-sm-3 control-label">
+                    {{ form_label(form.summary) }}
+                </div>
+                <div class="col-sm-9">
+                    {{ form_errors(form.summary) }}
+                    {{ form_widget(form.summary, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    {{ form_widget(form.update, {'attr': {'class': 'btn btn-default'}}) }}
+                </div>
+            </div>
+            {{ form_end(form) }}
         </div>
     </div>
 {% endblock %}

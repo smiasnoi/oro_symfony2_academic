@@ -65,6 +65,6 @@ class UserVoter extends Voter
      */
     protected function canEditProfileRole(User $profile, User $user, TokenInterface $token)
     {
-        return $this->decisionManager->decide($token, ['ROLE_ADMIN']) || $profile->getId() !== $user->getId();
+        return $profile->getId() !== $user->getId();
     }
 }

@@ -137,6 +137,35 @@ class IssueController extends Controller
     }
 
     /**
+     * @Route("/story/new/subtask/{id}", name="new_story_subtask", requirements={
+     *     "id": "\d+"
+     * })
+     */
+    public function createStorySubtaskAction(Issue $story)
+    {
+        $this->denyAccessUnlessGranted('handle', $story);
+
+        $subIssue = new Issue();
+
+        $subIssue->setProject($story->getProject())
+            ->setParent($story)
+            ->setReporter($this->getUser());
+
+        $form = $this->createForm(IssueForm::class, $subIssue, ['required' => false]);
+        $form->add('create', SubmitType::class);
+
+        $formHandler = $this->get('bugtracker.issue.form_handler');
+        if ($formHandler->handleCreateSubtaskForm($form)) {
+            return $this->redirectToRoute('issue_view', ['id' => $subIssue->getId()]);
+        }
+
+        return $this->render(
+            'BugTrackerBundle:issue:new_story.html.twig',
+            ['form' => $form->createView(), 'story' => $story]
+        );
+    }
+
+    /**
      * @Route("/issue/edit/{id}", name="issue_edit", requirements={
      *     "id": "\d+"
      * })
@@ -169,26 +198,10 @@ class IssueController extends Controller
     {
         $this->denyAccessUnlessGranted('handle', $issue);
 
-        $allowedStatuses = $this->getIssueStatusesToChange($issue);
-        if (array_key_exists($status, $allowedStatuses)) {
-            $em = $this->getDoctrine()->getEntityManager();
-            $issue->setStatus($status);
-            $em->persist($issue);
-            $em->flush();
-        }
+        $formHandler = $this->get('bugtracker.issue.form_handler');
+        $formHandler->handleIssueStatusChange($issue, $this->getUser(), $status);
 
         return $this->redirectToRoute('issue_view', ['id' => $issue->getId()]);
-    }
-
-    /**
-     * @Route("/story/new/subtask/{id}", name="new_story_subtask", requirements={
-     *     "id": "\d+"
-     * })
-     */
-    public function createStorySubtaskAction(Issue $story)
-    {
-        // @TODO implement new issue form for storie's subtask creation
-        return new Response();
     }
 
     /**

@@ -28,17 +28,6 @@ class ProjectController extends Controller
     }
 
     /**
-     * @Route("/issue/edit/{id}", name="project_edit", requirements={
-     *     "id": "\d+"
-     * })
-     */
-    public function editAction(Request $request, Project $project)
-    {
-        // @TODO implement new issue form for storie's subtask creation
-        return new Response();
-    }
-
-    /**
      * @Route("/project/new", name="project_new")
      */
     public function createAction(Request $request)
@@ -46,27 +35,41 @@ class ProjectController extends Controller
         $project = new Project();
         $this->denyAccessUnlessGranted('handle', $project);
 
+        $project->addMember($this->getUser());
         $form = $this->createForm(
             ProjectForm::class, $project,
-            ['validation_groups' => ['Default'], 'required' => false]
+            ['validation_groups' => ['Default', 'project_create'], 'required' => false]
         );
         $form->add('create', SubmitType::class);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getEntityManager();
-            $project->addMember($this->getUser());
-            $em->persist($project);
-            $em->flush();
 
+        $formHandler = $this->get('bugtracker.project.form_handler');
+        if ($formHandler->handleCreateForm($form)) {
+            return $this->redirectToRoute('project_view', ['id' => $project->getId()]);
+        }
+
+        return $this->render('BugTrackerBundle:project:new.html.twig', ['form' => $form->createView()]);
+    }
+
+    /**
+     * @Route("/project/edit/{id}", name="project_edit", requirements={
+     *     "id": "\d+"
+     * })
+     */
+    public function editAction(Project $project)
+    {
+        $this->denyAccessUnlessGranted('handle', $project);
+
+        $form = $this->createForm(ProjectForm::class, $project, ['required' => false]);
+        $form->add('update', SubmitType::class);
+
+        $formHandler = $this->get('bugtracker.project.form_handler');
+        if ($formHandler->handleEditForm($form)) {
             return $this->redirectToRoute('project_view', ['id' => $project->getId()]);
         }
 
         return $this->render(
-            'BugTrackerBundle:project:new.html.twig',
-            [
-                'form' => $form->createView(),
-                'route_group' => 'projects'
-            ]
+            'BugTrackerBundle:project:edit.html.twig',
+            ['project' => $project, 'form' => $form->createView()]
         );
     }
 

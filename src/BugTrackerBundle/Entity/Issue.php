@@ -132,20 +132,6 @@ class Issue
     private $updatedAt;
 
     /**
-     * Issue types vocabulary
-     * @return array
-     */
-    static public function getTypes()
-    {
-        return [
-            'bug' => 'Bug',
-            'subtask' =>'Subtask',
-            'task' => 'Task',
-            'story' => 'Story'
-        ];
-    }
-
-    /**
      * Issue priorities vocabulary
      * @return array
      */
@@ -156,21 +142,6 @@ class Issue
             'minor' => 'Minor',
             'major' => 'Major',
             'critical' => 'Critical'
-        ];
-    }
-
-    /**
-     * Issue statuses vocabulary
-     * @return array
-     */
-    static public function getStatuses()
-    {
-        return [
-            'new' => 'New',
-            'reopened' => 'Reopened',
-            'in_progress' => 'In progress',
-            'closed' => 'Closed',
-            'resolved' => 'Resolved'
         ];
     }
 

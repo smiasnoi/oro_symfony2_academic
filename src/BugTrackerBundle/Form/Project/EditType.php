@@ -13,10 +13,12 @@ class EditType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder
-            ->add('label', TextType::class)
-            ->add('code', TextType::class)
-            ->add('summary', TextType::class)
-        ;
+        $builder->add('label', TextType::class)
+            ->add('summary', TextType::class);
+
+        $validationGroups = isset($options['validation_groups']) ? $options['validation_groups'] : [];
+        if (in_array('project_create', $validationGroups)) {
+            $builder->add('code', TextType::class);
+        }
     }
 }

@@ -33,29 +33,34 @@ class EditType extends AbstractType
         $builder
             ->add('summary', TextType::class)
             ->add('description', TextareaType::class)
-            ->add('type', ChoiceType::class, [
-                'choices' => array_flip(IssueEntity::getTypes()),
-                'choices_as_values' => true
-            ])->add('priority', ChoiceType::class, [
+            ->add('priority', ChoiceType::class, [
                 'choices' => array_flip(IssueEntity::getPriorities()),
                 'choices_as_values' => true
             ])
         ;
 
+        $helper = $this->helper;
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
-                function (FormEvent $event) {
+                function (FormEvent $event) use ($helper) {
                     $form = $event->getForm();
+                    $issue = $event->getData();
 
-                    $data = $event->getData();
-                    $assignee = null === $data->getAssignee() ? [] : [$data->getAssignee()];
-
+                    $assignee = null === $issue->getAssignee() ? [] : [$issue->getAssignee()];
                     $form->add('assignee', EntityType::class, array(
                         'class' => UserEntity::class,
                         'choice_value' => 'id',
                         'choice_label' => 'fullname',
                         'choices' => $assignee,
                     ));
+
+                    $choices = $helper->getIssueTypesToChange($issue);
+                    if ($choices) {
+                        $form->add('type', ChoiceType::class, [
+                            'choices' => array_flip($choices),
+                            'choices_as_values' => true
+                        ]);
+                    }
                 }
         );
 

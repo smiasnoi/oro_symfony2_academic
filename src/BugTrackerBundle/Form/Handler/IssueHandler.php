@@ -3,25 +3,32 @@
 namespace BugTrackerBundle\Form\Handler;
 
 use BugTrackerBundle\Entity\Activity;
+use BugTrackerBundle\Mailer\Activity as ActivityMailer;
 use BugTrackerBundle\Entity\Comment;
 use Doctrine\ORM\EntityManager;
 use BugTrackerBundle\Entity\User;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
+use BugTrackerBundle\Helper\Issue as IssueHelper;
+use BugTrackerBundle\Entity\Issue as IssueEntity;
 
 class IssueHandler
 {
-    private $em;
+    protected $em;
+    protected $request;
+    protected $helper;
+    protected $activityMailer;
 
     public function __construct(
         EntityManager $entityManager,
-        RequestStack $requestStack
+        RequestStack $requestStack,
+        IssueHelper $helper,
+        ActivityMailer $activityMailer
     ){
         $this->em = $entityManager;
         $this->request = $requestStack->getCurrentRequest();
+        $this->helper = $helper;
+        $this->activityMailer = $activityMailer;
     }
 
     /**
@@ -54,6 +61,7 @@ class IssueHandler
             $activity = new Activity();
             $snappedData = ['issue_code' => $issue->getCode()];
             $activity->setProject($project)
+                ->setIssue($issue)
                 ->setUser($reporter)
                 ->setEntityId($issue->getId())
                 ->setEntity('Issue')
@@ -62,11 +70,24 @@ class IssueHandler
                 ->setCreatedAt(new \DateTime());
             $em->persist($activity);
             $em->flush();
+            $this->activityMailer->notifyCollaborators($activity);
 
             return true;
         } else {
             return false;
         }
+    }
+
+    /**
+     * @param FormInterface $form
+     * @return bool
+     */
+    public function handleCreateSubtaskForm(FormInterface $form)
+    {
+        $issue = $this->getIssue($form);
+        $issue->setType($this->helper->getSubtaskType());
+
+        return $this->handleCreateForm($form);
     }
 
     /**
@@ -132,6 +153,7 @@ class IssueHandler
                 ->setCreatedAt(new \DateTime());
             $em->persist($activity);
             $em->flush();
+            $this->activityMailer->notifyCollaborators($activity);
 
             return true;
         } else {
@@ -151,8 +173,6 @@ class IssueHandler
         $form->handleRequest($this->request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
-
-            $em = $this->getDoctrine()->getEntityManager();
             $em->persist($comment);
 
             $issue = $comment->getIssue();
@@ -185,6 +205,47 @@ class IssueHandler
         }
     }
 
+
+    /**
+     * @param IssueEntity $issue
+     * @param User $reporter
+     * @param string $status
+     * @return bool
+     */
+    public function handleIssueStatusChange(IssueEntity $issue, User $reporter, $status)
+    {
+        $allowedStatuses = $this->helper->getIssueStatusesToChange($issue);
+        if (array_key_exists($status, $allowedStatuses)) {
+            $em = $this->em;
+
+            $issue->setStatus($status);
+            $em->persist($issue);
+            $em->flush();
+
+            $activity = new Activity();
+            $snappedData = [
+                'issue_code' => $issue->getCode(),
+                'old_status' => 'new',
+                'status' => $issue->getStatus()
+            ];
+            $activity->setIssue($issue)
+                ->setProject($issue->getProject())
+                ->setUser($reporter)
+                ->setEntityId($issue->getId())
+                ->setEntity('Issue')
+                ->setSnappedData($snappedData)
+                ->setType(Activity::ISSUE_STATUS_CHANGE_TYPE)
+                ->setCreatedAt(new \DateTime());
+            $em->persist($activity);
+            $em->flush();
+            $this->activityMailer->notifyCollaborators($activity);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * @param FormInterface $form
      * @return User
@@ -193,7 +254,7 @@ class IssueHandler
     protected function getIssue(FormInterface $form)
     {
         $issue = $form->getData();
-        if (!is_object($issue) && !($issue instanceof Issue)) {
+        if (!is_object($issue) && !($issue instanceof IssueEntity)) {
             throw new \Exception("Form has no issue entity set");
         }
 

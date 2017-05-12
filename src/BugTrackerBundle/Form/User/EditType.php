@@ -24,7 +24,8 @@ class EditType extends AbstractType
             ->add('password', PasswordType::class)
             ->add('cpassword', PasswordType::class, ['label' => 'Repeat password']);
 
-        if (in_array('user_edit', $options['validation_groups'])) {
+        $validationGroups = isset($options['validation_groups']) ? $options['validation_groups'] : [];
+        if (in_array('user_edit', $validationGroups)) {
             $user = $options['data'] ?: new UserEntity();
             $role = current($user->getRoles());
 
