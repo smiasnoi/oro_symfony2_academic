@@ -37,6 +37,35 @@ class Issue
     }
 
     /**
+     * Issue priorities vocabulary
+     * @return array
+     */
+    public function getPriorities()
+    {
+        return [
+            'low' => 'Low',
+            'minor' => 'Minor',
+            'major' => 'Major',
+            'critical' => 'Critical'
+        ];
+    }
+
+    /**
+     * Issue resolutions vocabulary
+     * @return array
+     */
+    static public function getResolutions()
+    {
+        return [
+            'wont_fix' => 'Won\'t fix',
+            'fix' => 'Fix',
+            'duplicate' => 'Duplicate',
+            'done' => 'Done',
+            'incomplete' =>'Incomplete'
+        ];
+    }
+
+    /**
      * @param string $code
      * @return string
      */
@@ -82,10 +111,11 @@ class Issue
         $allTypes = $this->getAllTypes();
         switch ($issue->getType()) {
             case 'bug':
-                $allowedTypes = ['task', 'story'];
+                $allowedTypes = ['bug', 'task', 'story'];
                 break;
             case 'subtask':
-                $allowedTypes = ['story_bug'];
+            case 'story_bug':
+                $allowedTypes = ['subtask', 'story_bug'];
                 break;
             default:
                 $allowedTypes = !$issue->getParent() ? ['bug', 'task', 'story'] : [];

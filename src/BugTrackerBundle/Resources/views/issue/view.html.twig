@@ -129,8 +129,8 @@
                                         {% if loop.first == false %}<hr />{% endif %}
                                         <a class="user-link" target="_blank" href="{{ path('user_view', {'id': comment.author.id}) }}">
                                             {{ comment.author.fullname }}
-                                        </a>
-                                        <p class="body">{{ comment.body|nl2br }}</p>
+                                        </a> added a commnet on <span class="date">{{ comment.createdAt|date("F jS \\a\\t g:ia") }}</span>
+                                        <p class="body mark">{{ comment.body|nl2br }}</p>
                                     </div>
                                     {% if is_granted(['edit', 'delete'], comment) %}
                                     <div class="actions">

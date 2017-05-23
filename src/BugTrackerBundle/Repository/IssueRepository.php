@@ -36,7 +36,7 @@ class IssueRepository extends Paginated
             ->where('i.status IN(:statuses) AND i.assignee=:assignee')
             ->orderBy('i.updatedAt', 'DESC')
             ->setParameter(':statuses', ['new', 'reopened', 'in_progress'])
-            ->setParameter(':assignee', $assignee->getId());
+            ->setParameter(':assignee', $assignee);
 
         return $this->getPaginatedResultForQuery($qb, 'i', $pagination);
     }
@@ -49,11 +49,11 @@ class IssueRepository extends Paginated
     public function findAllOpenedByCollaborator(User $collaborator, $pagination)
     {
         $qb = $this->createQueryBuilder('i')
-            ->innerJoin('i.collaborators', 'c', 'WITH', 'c.id=:user_id')
+            ->innerJoin('i.collaborators', 'c', 'WITH', 'c=:user')
             ->where('i.status IN(:statuses)')
             ->orderBy('i.updatedAt', 'DESC')
             ->setParameter(':statuses', ['open', 'reopened'])
-            ->setParameter(':user_id', $collaborator->getId());
+            ->setParameter(':user', $collaborator);
 
         return $this->getPaginatedResultForQuery($qb, 'i', $pagination);
     }

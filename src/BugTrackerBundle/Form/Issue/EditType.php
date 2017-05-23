@@ -34,7 +34,7 @@ class EditType extends AbstractType
             ->add('summary', TextType::class)
             ->add('description', TextareaType::class)
             ->add('priority', ChoiceType::class, [
-                'choices' => array_flip(IssueEntity::getPriorities()),
+                'choices' => array_flip($this->helper->getPriorities()),
                 'choices_as_values' => true
             ])
         ;

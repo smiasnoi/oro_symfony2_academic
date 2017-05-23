@@ -132,35 +132,6 @@ class Issue
     private $updatedAt;
 
     /**
-     * Issue priorities vocabulary
-     * @return array
-     */
-    static public function getPriorities()
-    {
-        return [
-            'low' => 'Low',
-            'minor' => 'Minor',
-            'major' => 'Major',
-            'critical' => 'Critical'
-        ];
-    }
-
-    /**
-     * Issue resolutions vocabulary
-     * @return array
-     */
-    static public function getResolutions()
-    {
-        return [
-            'wont_fix' => 'Won\'t fix',
-            'fix' => 'Fix',
-            'duplicate' => 'Duplicate',
-            'done' => 'Done',
-            'incomplete' =>'Incomplete'
-        ];
-    }
-
-    /**
      * Constructor
      */
     public function __construct()
