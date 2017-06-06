@@ -33,7 +33,7 @@ class Pagination extends \Twig_Extension
      * @param array $queryVars
      * @return array
      */
-    public function getPagination($collection, $route, $queryVars)
+    public function getPagination(array $collection, $route, array $queryVars)
     {
         $result = [
             'prev_page_url' => null,

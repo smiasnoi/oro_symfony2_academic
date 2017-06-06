@@ -14,6 +14,8 @@ class UserHandler
 {
     private $em;
     private $encoder;
+    private $request;
+    private $requestStack;
 
     const SUBMITTED_USER_PASSWORD_MIN_LENGTH = 7;
 
@@ -24,8 +26,7 @@ class UserHandler
     ){
         $this->em = $entityManager;
         $this->encoder = $encoder;
-        $this->request = $requestStack->getCurrentRequest();
-        $this->userRepository = $this->em->getRepository('BugTrackerBundle:User');
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -36,10 +37,12 @@ class UserHandler
     {
         $user = $this->getUser($form);
 
-        $form->handleRequest($this->request);
-        if ($form->isSubmitted() && $form->isValid()
-            && $this->validateSubmittedUser($user, $form)
-        ) {
+        $form->handleRequest($this->getRequest());
+        if (!$form->isValid()) {
+            return false;
+        }
+
+        if ($this->validateSubmittedUser($user, $form)) {
             $plainPassword = $user->getPassword();
             $encodedPassword = $this->encoder->encodePassword($user, $plainPassword);
             $user->setPassword($encodedPassword)
@@ -48,9 +51,9 @@ class UserHandler
             $this->em->flush($user);
 
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -60,12 +63,13 @@ class UserHandler
      */
     public function handleEditForm(FormInterface $form)
     {
-        $user = $this->getUser($form);
+        $form->handleRequest($this->getRequest());
+        if (!$form->isValid()) {
+            return false;
+        }
 
-        $form->handleRequest($this->request);
-        if ($form->isSubmitted() && $form->isValid()
-            && $this->validateSubmittedUser($user, $form)
-        ) {
+        $user = $this->getUser($form);
+        if ($this->validateSubmittedUser($user, $form)) {
             if ($user->getCpassword()) {
                 $plainPassword = $user->getPassword();
                 $encodedPassword = $this->encoder->encodePassword($user, $plainPassword);
@@ -97,6 +101,22 @@ class UserHandler
     }
 
     /**
+     * @return null|\Symfony\Component\HttpFoundation\Request
+     * @throws \Exception
+     */
+    public function getRequest()
+    {
+        if (!$this->request) {
+            $this->request = $this->requestStack->getCurrentRequest();
+            if (!$this->requestStack) {
+                throw new \Exception("No HTTP request has been initialized");
+            }
+        }
+
+        return $this->request;
+    }
+
+    /**
      * @param UserInterface $user
      * @param FormInterface $form
      * @return bool
@@ -118,7 +138,8 @@ class UserHandler
             }
         }
 
-        if ($this->userRepository->userExists($user)){
+        $userRepository = $this->em->getRepository('BugTrackerBundle:User');
+        if ($userRepository->userExists($user)){
             $form->addError(new FormError("User with given username or email already exists"));
             $isValid = false;
         }

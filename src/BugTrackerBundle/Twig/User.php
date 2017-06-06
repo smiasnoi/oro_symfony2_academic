@@ -33,7 +33,7 @@ class User extends \Twig_Extension
      */
     public function getProjectMembers(Project $project)
     {
-        $page = (int)$this->request->query->get(UserRepository::PAGE_VAR) ?: 1;
+        $page = (int)$this->request->get(UserRepository::PAGE_VAR, 1);
         $pagination = [UserRepository::KEY_PAGE => $page];
 
         return $this->em->getRepository('BugTrackerBundle:User')
