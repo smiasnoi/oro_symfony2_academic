@@ -16,7 +16,7 @@ class UserHandlerTest extends TestCase
     protected $userMock;
     protected $userRepoMock;
 
-    public function setUpMocks()
+    public function setUp()
     {
         $this->emMock = $this->getMockBuilder('Doctrine\ORM\EntityManager')
             ->disableOriginalConstructor()
@@ -24,7 +24,7 @@ class UserHandlerTest extends TestCase
         $encoderMock = $this->getMockBuilder('Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface')
             ->disableOriginalConstructor()
             ->getMock();
-        $requestMock = $this->getMockBuilder('Symfony\Component\HttpFoundation\RequestStack')
+        $this->requestStock = $this->getMockBuilder('Symfony\Component\HttpFoundation\RequestStack')
             ->disableOriginalConstructor()
             ->getMock();
         $this->formMock = $this->getMockBuilder('Symfony\Component\Form\FormInterface')
@@ -36,43 +36,66 @@ class UserHandlerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->emMock->expects($this->once())->method('getRepository')->with('BugTrackerBundle:User')->willReturn($this->userRepoMock);
-        $this->handler = new UserHandler($this->emMock, $encoderMock, $requestMock);
+        $this->emMock->expects($this->any())->method('getRepository')->with('BugTrackerBundle:User')->willReturn($this->userRepoMock);
+        $this->handler = new UserHandler($this->emMock, $encoderMock, $this->requestStock);
     }
 
-    public function testHandleEditRegisterCases()
+    public function testUserSuccessfulRegistration()
     {
-        // new user case
-        $this->setUpMocks();
         $this->user->setPassword('12345678')->setCpassword('12345678');
+        $this->requestStock->expects($this->once())->method('getCurrentRequest')->willReturn(true);
         $this->formMock->method('isValid')->willReturn(true);
-        $this->formMock->method('isSubmitted')->willReturn(true);
         $this->formMock->method('getData')->willReturn($this->user);
         $this->userRepoMock->method('userExists')->willReturn(false);
         $this->assertTrue($this->handler->handleRegisterForm($this->formMock));
+    }
 
-        // existing user case
-        $this->setUpMocks();
+    public function testExistingUserCatch()
+    {
         $this->user->setPassword('12345678')->setCpassword('12345678');
+        $this->requestStock->expects($this->once())->method('getCurrentRequest')->willReturn(true);
         $this->formMock->expects($this->once())->method('isValid')->willReturn(true);
-        $this->formMock->expects($this->once())->method('isSubmitted')->willReturn(true);
         $this->formMock->expects($this->once())->method('getData')->willReturn($this->user);
         $this->userRepoMock->expects($this->once())->method('userExists')->willReturn(true);
         $this->assertFalse($this->handler->handleRegisterForm($this->formMock));
+    }
 
-        // invalid submitted data case
-        $this->setUpMocks();
-        $this->formMock->expects($this->once())->method('getData')->willReturn($this->user);
+    public function testFailedUserSubmition()
+    {
+        $this->requestStock->expects($this->once())->method('getCurrentRequest')->willReturn(true);
         $this->assertFalse($this->handler->handleRegisterForm($this->formMock));
+    }
 
-        // no user bound to form case
-        $this->setUpMocks();
-        $message = null;
-        try {
-            $this->handler->handleRegisterForm($this->formMock);
-        } catch(\Exception $e) {
-            $message = $e->getMessage();
-        }
-        $this->assertContains('From has no user entity set', $message);
+    /**
+     * @expectedException Exception
+     * @expectExceptionMessage From has no user entity set
+     */
+    public function testFailedUserEntitySetup()
+    {
+        $this->requestStock->expects($this->once())->method('getCurrentRequest')->willReturn(true);
+        $this->formMock->method('isValid')->willReturn(true);
+        $this->handler->handleRegisterForm($this->formMock);
+    }
+
+    /**
+     * @expectedException Exception
+     * @expectExceptionMessage From has no user entity set
+     */
+    public function testFailedUserEntitySetup2()
+    {
+        $this->requestStock->expects($this->once())->method('getCurrentRequest')->willReturn(true);
+        $this->formMock->method('isValid')->willReturn(true);
+        $this->handler->handleEditForm($this->formMock);
+    }
+
+    /**
+     * @expectedException Exception
+     * @expectedExceptionMessage No HTTP request has been initialized
+     */
+    public function testEmptyRequest()
+    {
+        $this->requestStock->expects($this->once())->method('getCurrentRequest')->willReturn(null);
+        $this->formMock->method('isValid')->willReturn(true);
+        $this->handler->handleRegisterForm($this->formMock);
     }
 }

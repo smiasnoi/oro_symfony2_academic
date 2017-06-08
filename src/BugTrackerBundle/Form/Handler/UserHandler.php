@@ -35,13 +35,12 @@ class UserHandler
      */
     public function handleRegisterForm(FormInterface $form)
     {
-        $user = $this->getUser($form);
-
         $form->handleRequest($this->getRequest());
         if (!$form->isValid()) {
             return false;
         }
 
+        $user = $this->getUser($form);
         if ($this->validateSubmittedUser($user, $form)) {
             $plainPassword = $user->getPassword();
             $encodedPassword = $this->encoder->encodePassword($user, $plainPassword);
@@ -107,10 +106,11 @@ class UserHandler
     public function getRequest()
     {
         if (!$this->request) {
-            $this->request = $this->requestStack->getCurrentRequest();
-            if (!$this->requestStack) {
+            $request = $this->requestStack->getCurrentRequest();
+            if (!$request) {
                 throw new \Exception("No HTTP request has been initialized");
             }
+            $this->request = $request;
         }
 
         return $this->request;

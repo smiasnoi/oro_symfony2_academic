@@ -72,8 +72,9 @@ class UserController extends Controller
             // auto login
             $token = new UsernamePasswordToken($user, $user->getPassword(), "secured_area", $user->getRoles());
             $this->get("security.context")->setToken($token);
-            $event = new InteractiveLoginEvent($request, $token);
-            $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
+            $session = $this->get('session');
+            $session->set('_security_' . 'secured_area', serialize($token));
+            $session->save();
 
             return $this->redirectToRoute('dashboard');
         }
