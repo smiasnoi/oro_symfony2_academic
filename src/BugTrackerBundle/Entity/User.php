@@ -32,7 +32,7 @@ class User implements UserInterface, \Serializable
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=32, unique=true)
+     * @ORM\Column(type="string", length=64, unique=true)
      *
      * @Assert\NotBlank()
      */

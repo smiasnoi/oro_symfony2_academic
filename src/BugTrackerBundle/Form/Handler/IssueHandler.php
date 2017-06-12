@@ -42,7 +42,7 @@ class IssueHandler
         $reporter = $issue->getReporter();
 
         $issue->setCode($project->getCode() . '-' . uniqid())
-            ->setStatus('new');
+            ->setStatus($this->helper->getNewStatus());
 
         $form->handleRequest($this->request);
         if ($form->isSubmitted() && $form->isValid()) {

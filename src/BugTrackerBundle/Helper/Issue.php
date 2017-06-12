@@ -127,6 +127,14 @@ class Issue
     /**
      * @return string
      */
+    public function getNewStatus()
+    {
+        return 'new';
+    }
+
+    /**
+     * @return string
+     */
     public function getSubtaskType()
     {
         return 'subtask';

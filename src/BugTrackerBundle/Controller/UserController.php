@@ -71,7 +71,6 @@ class UserController extends Controller
         if ($formHandler->handleRegisterForm($form)) {
             // auto login
             $token = new UsernamePasswordToken($user, $user->getPassword(), "secured_area", $user->getRoles());
-            $this->get("security.context")->setToken($token);
             $session = $this->get('session');
             $session->set('_security_' . 'secured_area', serialize($token));
             $session->save();
@@ -91,7 +90,7 @@ class UserController extends Controller
     {
         $page = (int)$request->query->get(IssueRepository::PAGE_VAR) ?: 1;
         $pagination = [IssueRepository::KEY_PAGE => $page];
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
 
         return $this->render(
             'BugTrackerBundle:user:view.html.twig',
@@ -109,7 +108,7 @@ class UserController extends Controller
     {
         $page = (int)$request->query->get(IssueRepository::PAGE_VAR) ?: 1;
         $pagination = [IssueRepository::KEY_PAGE => $page];
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
 
         return $this->render(
             'BugTrackerBundle::dashboard.html.twig',
@@ -147,7 +146,7 @@ class UserController extends Controller
      */
     public function listViewAction(Request $request)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $page = (int)$request->query->get(UserRepository::PAGE_VAR) ?: 1;
         $pagination = [UserRepository::KEY_PAGE => $page];
 
@@ -162,7 +161,7 @@ class UserController extends Controller
      */
     public function ajaxSearchAction(Request $request)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $users = $em->getRepository('BugTrackerBundle:User')->findAllPaginated(
             [UserRepository::KEY_PAGE => (int)$request->query->get('p') ?: 1],
             ['searchCriteria' => $request->query->get('q')]

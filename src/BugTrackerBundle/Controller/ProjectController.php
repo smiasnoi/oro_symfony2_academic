@@ -78,7 +78,7 @@ class ProjectController extends Controller
      */
     public function listAction(Request $request)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $user = $this->isGranted('ROLE_MANAGER') ? null : $this->getUser();
         $page = (int)$request->query->get(ProjectRepository::PAGE_VAR) ?: 1;
         $pagination = [ProjectRepository::KEY_PAGE => $page];

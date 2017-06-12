@@ -209,7 +209,7 @@ class IssueController extends Controller
      */
     public function listAction(Request $request)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $collaborator = $this->isGranted('ROLE_MANAGER') ? null : $this->getUser();
         $page = (int)$request->query->get(IssueRepository::PAGE_VAR) ?: 1;
         $pagination = [IssueRepository::KEY_PAGE => $page];
