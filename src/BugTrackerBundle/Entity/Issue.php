@@ -5,6 +5,7 @@ namespace BugTrackerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use BugTrackerBundle\Validator\Constraints as BugTrackerBundleAssert;
 
 /**
  * @ORM\Entity(repositoryClass="BugTrackerBundle\Repository\IssueRepository")
@@ -18,6 +19,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         @ORM\Index(name="created_idx", columns={"created_at"}),
  *         @ORM\Index(name="updated_idx", columns={"updated_at"})
  *     })
+ * @BugTrackerBundleAssert\Issue\Type
+ * @BugTrackerBundleAssert\Issue\Status
  */
 class Issue
 {

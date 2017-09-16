@@ -82,3 +82,15 @@ services:
         tags:
             - { name: security.voter }
         public: false
+    bugtracker.contains_issue_type_validator:
+            class: BugTrackerBundle\Validator\Constraints\Issue\TypeValidator
+            arguments:
+                ["@doctrine.orm.entity_manager", "@bugtracker.issue.helper"]
+            tags:
+                - { name: validator.constraint_validator }
+    bugtracker.contains_issue_status_validator:
+            class: BugTrackerBundle\Validator\Constraints\Issue\StatusValidator
+            arguments:
+                ["@doctrine.orm.entity_manager", "@bugtracker.issue.helper"]
+            tags:
+                - { name: validator.constraint_validator }

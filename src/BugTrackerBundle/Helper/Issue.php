@@ -10,7 +10,7 @@ class Issue
      * Issue statuses vocabulary
      * @return array
      */
-    protected function getAllStatuses()
+    public function getAllStatuses()
     {
         return [
             'new' => 'New',
@@ -25,7 +25,7 @@ class Issue
      * Issue types vocabulary
      * @return array
      */
-    protected function getAllTypes()
+    public function getAllTypes()
     {
         return [
             'bug' => 'Bug',
@@ -82,8 +82,18 @@ class Issue
     public function getIssueStatusesToChange(IssueEntity $issue)
     {
         $allStatuses = $this->getAllStatuses();
+        $allowedStatuses = $this->getAllowedStatusesToChange($issue->getStatus());
 
-        switch ($issue->getStatus()) {
+        return array_intersect_key($allStatuses, array_flip($allowedStatuses));
+    }
+
+    /**
+     * @param $status
+     * @return array
+     */
+    public function getAllowedStatusesToChange($status)
+    {
+        switch ($status) {
             case 'new':
             case 'reopened':
                 $allowedStatuses = ['in_progress', 'closed'];
@@ -99,7 +109,7 @@ class Issue
                 $allowedStatuses = [];
         }
 
-        return array_intersect_key($allStatuses, array_flip($allowedStatuses));
+        return $allowedStatuses;
     }
 
     /**
@@ -109,7 +119,19 @@ class Issue
     public function getIssueTypesToChange(IssueEntity $issue)
     {
         $allTypes = $this->getAllTypes();
-        switch ($issue->getType()) {
+        $allowedTypes = $this->getAllowedTypesToChange($issue->getType(), is_object($issue->getParent()));
+
+        return array_intersect_key($allTypes, array_flip($allowedTypes));
+    }
+
+    /**
+     * @param string $type
+     * @param bool $hasParent
+     * @return array
+     */
+    public function getAllowedTypesToChange($type, $hasParent)
+    {
+        switch ($type) {
             case 'bug':
                 $allowedTypes = ['bug', 'task', 'story'];
                 break;
@@ -118,10 +140,10 @@ class Issue
                 $allowedTypes = ['subtask', 'story_bug'];
                 break;
             default:
-                $allowedTypes = !$issue->getParent() ? ['bug', 'task', 'story'] : [];
+                $allowedTypes = !$hasParent ? ['bug', 'task', 'story'] : [];
         }
 
-        return array_intersect_key($allTypes, array_flip($allowedTypes));
+        return $allowedTypes;
     }
 
     /**

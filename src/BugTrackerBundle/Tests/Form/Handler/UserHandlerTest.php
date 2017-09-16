@@ -2,10 +2,9 @@
 
 namespace BugTrackerBundle\Tests\Form\Handler;
 
-use BugTrackerBundle\BugTrackerBundle;
 use PHPUnit\Framework\TestCase;
 use BugTrackerBundle\Form\Handler\UserHandler;
-use BugTrackerBundle\Entity\User;
+use BugTrackerBundle\Entity\User as User;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 class UserHandlerTest extends TestCase

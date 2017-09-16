@@ -6,12 +6,11 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-
-use BugTrackerBundle\Entity\Issue as IssueEntity;
 use BugTrackerBundle\Entity\User as UserEntity;
 use BugTrackerBundle\Helper\Issue as IssueHelper;
 
@@ -47,19 +46,21 @@ class EditType extends AbstractType
                     $issue = $event->getData();
 
                     $assignee = null === $issue->getAssignee() ? [] : [$issue->getAssignee()];
-                    $form->add('assignee', EntityType::class, array(
+                    $form->add('assignee', EntityType::class, [
                         'class' => UserEntity::class,
                         'choice_value' => 'id',
                         'choice_label' => 'fullname',
                         'choices' => $assignee,
-                    ));
+                    ]);
 
                     $choices = $helper->getIssueTypesToChange($issue);
-                    if ($choices) {
+                    if (count($choices) > 1) {
                         $form->add('type', ChoiceType::class, [
                             'choices' => array_flip($choices),
                             'choices_as_values' => true
                         ]);
+                    } else {
+                        $form->add('type', HiddenType::class, ['data' => key($choices)]);
                     }
                 }
         );
