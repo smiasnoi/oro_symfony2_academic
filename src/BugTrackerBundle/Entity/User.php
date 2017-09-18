@@ -5,10 +5,12 @@ namespace BugTrackerBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="BugTrackerBundle\Repository\UserRepository")
  * @ORM\Table(name="users", indexes={@ORM\Index(name="roles_idx", columns={"roles"})})
+ * @UniqueEntity("email")
  */
 class User implements UserInterface, \Serializable
 {
@@ -47,14 +49,14 @@ class User implements UserInterface, \Serializable
 
     /**
      * @ORM\Column(type="string", length=128)
-     * @Assert\NotBlank(groups={"registration"})
      */
     private $password_hash;
 
     /**
-     * @Assert\NotBlank(groups={"registration"})
+     * @Assert\NotBlank(groups={"user_register"})
+     * @Assert\Length(min=7)
      */
-    private $cpassword;
+    private $plain_password;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -174,18 +176,13 @@ class User implements UserInterface, \Serializable
      */
     public function setPassword($passwordHash)
     {
-        if ($passwordHash) {
-            $this->password_hash = $passwordHash;
-        }
+        $this->password_hash = $passwordHash;
 
         return $this;
     }
 
     /**
      * Get password_hash
-     *
-     * @Assert\NotBlank(groups={"user_register"})
-     * @Assert\Length(min=7)
      *
      * @return string
      */
@@ -195,24 +192,21 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     *
      * @return User
      */
-    public function setCpassword($cpassword)
+    public function setPlainPassword($password)
     {
-        $this->cpassword = $cpassword;
+        $this->plain_password = $password;
 
         return $this;
     }
 
     /**
-     * @Assert\NotBlank(groups={"user_register"})
-     *
      * @return null
      */
-    public function getCpassword()
+    public function getPlainPassword()
     {
-        return $this->cpassword;
+        return $this->plain_password;
     }
 
     /**

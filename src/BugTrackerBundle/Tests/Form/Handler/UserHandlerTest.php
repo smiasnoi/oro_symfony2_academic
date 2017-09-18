@@ -41,22 +41,11 @@ class UserHandlerTest extends TestCase
 
     public function testUserSuccessfulRegistration()
     {
-        $this->user->setPassword('12345678')->setCpassword('12345678');
+        $this->user->setPlainPassword('12345678');
         $this->requestStock->expects($this->once())->method('getCurrentRequest')->willReturn(true);
         $this->formMock->method('isValid')->willReturn(true);
         $this->formMock->method('getData')->willReturn($this->user);
-        $this->userRepoMock->method('userExists')->willReturn(false);
         $this->assertTrue($this->handler->handleRegisterForm($this->formMock));
-    }
-
-    public function testExistingUserCatch()
-    {
-        $this->user->setPassword('12345678')->setCpassword('12345678');
-        $this->requestStock->expects($this->once())->method('getCurrentRequest')->willReturn(true);
-        $this->formMock->expects($this->once())->method('isValid')->willReturn(true);
-        $this->formMock->expects($this->once())->method('getData')->willReturn($this->user);
-        $this->userRepoMock->expects($this->once())->method('userExists')->willReturn(true);
-        $this->assertFalse($this->handler->handleRegisterForm($this->formMock));
     }
 
     public function testFailedUserSubmition()

@@ -41,18 +41,14 @@ class UserHandler
         }
 
         $user = $this->getUser($form);
-        if ($this->validateSubmittedUser($user, $form)) {
-            $plainPassword = $user->getPassword();
-            $encodedPassword = $this->encoder->encodePassword($user, $plainPassword);
-            $user->setPassword($encodedPassword)
-                ->setRoles([User::OPERATOR_ROLE]);
-            $this->em->persist($user);
-            $this->em->flush($user);
+        $plainPassword = $user->getPlainPassword();
+        $encodedPassword = $this->encoder->encodePassword($user, $plainPassword);
+        $user->setPassword($encodedPassword)
+            ->setRoles([User::OPERATOR_ROLE]);
+        $this->em->persist($user);
+        $this->em->flush($user);
 
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
@@ -68,20 +64,16 @@ class UserHandler
         }
 
         $user = $this->getUser($form);
-        if ($this->validateSubmittedUser($user, $form)) {
-            if ($user->getCpassword()) {
-                $plainPassword = $user->getPassword();
-                $encodedPassword = $this->encoder->encodePassword($user, $plainPassword);
-                $user->setPassword($encodedPassword);
-            }
-
-            $this->em->persist($user);
-            $this->em->flush($user);
-
-            return true;
-        } else {
-            return false;
+        if ($user->getPlainPassword()) {
+            $plainPassword = $user->getPlainPassword();
+            $encodedPassword = $this->encoder->encodePassword($user, $plainPassword);
+            $user->setPassword($encodedPassword);
         }
+
+        $this->em->persist($user);
+        $this->em->flush($user);
+
+        return true;
     }
 
     /**
@@ -114,36 +106,5 @@ class UserHandler
         }
 
         return $this->request;
-    }
-
-    /**
-     * @param UserInterface $user
-     * @param FormInterface $form
-     * @return bool
-     */
-    protected function validateSubmittedUser(UserInterface $user, FormInterface $form)
-    {
-        $isValid = true;
-        $password = $user->getPassword();
-        $cpassword = $user->getCpassword();
-        if ($cpassword) {
-            if ($password != $cpassword) {
-                $field = $form->get('cpassword');
-                $field->addError(new FormError("Passwords must be equal"));
-                $isValid = false;
-            } elseif (strlen($cpassword) < self::SUBMITTED_USER_PASSWORD_MIN_LENGTH) {
-                $field = $form->get('password');
-                $field->addError(new FormError("Password must have length of 7 or more characters"));
-                $isValid = false;
-            }
-        }
-
-        $userRepository = $this->em->getRepository('BugTrackerBundle:User');
-        if ($userRepository->userExists($user)){
-            $form->addError(new FormError("User with given username or email already exists"));
-            $isValid = false;
-        }
-
-        return $isValid;
     }
 }
