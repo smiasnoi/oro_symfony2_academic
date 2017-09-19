@@ -10,7 +10,16 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * @ORM\Entity(repositoryClass="BugTrackerBundle\Repository\UserRepository")
  * @ORM\Table(name="users", indexes={@ORM\Index(name="roles_idx", columns={"roles"})})
- * @UniqueEntity("email")
+ * @UniqueEntity(
+ *     fields="email",
+ *     errorPath="email",
+ *     message="user.email.reserved"
+ * )
+ * @UniqueEntity(
+ *     fields="username",
+ *     errorPath="username",
+ *     message="user.username.reserved"
+ * )
  */
 class User implements UserInterface, \Serializable
 {

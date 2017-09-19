@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraint;
 class Type extends Constraint
 {
     public $typeProperty = "type";
-    public $message = "Not allowed type change for issue from '%old_type%' to '%new_type%'";
+    public $message = 'issue.type.not_valid';
 
     public function getTargets()
     {

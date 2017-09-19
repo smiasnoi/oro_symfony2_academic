@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraint;
 class Status extends Constraint
 {
     public $statusProperty = "status";
-    public $message = "Not allowed status change for issue from '%old_status%' to '%new_status%'";
+    public $message = "issue.status.not_valid";
 
     public function getTargets()
     {

@@ -106,7 +106,7 @@ class Issue
                 $allowedStatuses = ['closed', 'resolved'];
                 break;
             default:
-                $allowedStatuses = [];
+                $allowedStatuses = ['new'];
         }
 
         return $allowedStatuses;
