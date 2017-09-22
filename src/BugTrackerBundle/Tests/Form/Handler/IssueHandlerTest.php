@@ -2,9 +2,13 @@
 
 namespace BugTrackerBundle\Tests\Form\Handler;
 
+use BugTrackerBundle\Entity\Project;
 use PHPUnit\Framework\TestCase;
-use BugTrackerBundle\Form\Handler\UserHandler;
-use BugTrackerBundle\Entity\User as UserEntity;
+use BugTrackerBundle\Form\Handler\IssueHandler;
+use BugTrackerBundle\Entity\Issue as IssueEntity;
+use BugTrackerBundle\Entity\Project as ProjectEntity;
+use BugTrackerBundle\Entity\Activity as ActivityEntity;
+use BugTrackerBundle\Entity\Comment as CommentEntity;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 class UserHandlerTest extends TestCase
@@ -13,7 +17,7 @@ class UserHandlerTest extends TestCase
     protected $emMock;
     protected $requestStack;
     protected $formMock;
-    protected $user;
+    protected $issue;
 
     public function setUp()
     {
@@ -29,46 +33,27 @@ class UserHandlerTest extends TestCase
         $this->formMock = $this->getMockBuilder('Symfony\Component\Form\FormInterface')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->user = new UserEntity();
+        $this->issue = new IssueEntity();
+        $this->project = new ProjectEntity();
+        $this->comment = new CommentEntity();
 
-        $this->handler = new UserHandler($this->emMock, $encoderMock, $this->requestStack);
-    }
+        $issueHelperMock = $this->getMockBuilder('Symfony\Component\Form\FormInterface')
+            ->disableOriginalConstructor()
+            ->getMock();
 
-    public function testUserSuccessfulRegistration()
-    {
-        $this->user->setPlainPassword('12345678');
-        $this->requestStack->expects($this->once())->method('getCurrentRequest')->willReturn(true);
-        $this->formMock->method('isValid')->willReturn(true);
-        $this->formMock->method('getData')->willReturn($this->user);
-        $this->assertTrue($this->handler->handleRegisterForm($this->formMock));
-    }
-
-    public function testFailedUserSubmition()
-    {
-        $this->requestStack->expects($this->once())->method('getCurrentRequest')->willReturn(true);
-        $this->assertFalse($this->handler->handleRegisterForm($this->formMock));
+        $this->emMock->expects($this->any())->method('getRepository')->with('BugTrackerBundle:Issue')->willReturn($this->issueRepoMock);
+        $this->handler = new IssueHandler($this->emMock, $this->requestStack, $issueHelperMock, );
     }
 
     /**
      * @expectedException Exception
-     * @expectExceptionMessage From has no user entity set
+     * @expectExceptionMessage Form has no issue entity set
      */
-    public function testFailedUserEntitySetup()
+    public function testFailedIssueEntitySetup()
     {
         $this->requestStack->expects($this->once())->method('getCurrentRequest')->willReturn(true);
         $this->formMock->method('isValid')->willReturn(true);
         $this->handler->handleRegisterForm($this->formMock);
-    }
-
-    /**
-     * @expectedException Exception
-     * @expectExceptionMessage From has no user entity set
-     */
-    public function testFailedUserEntitySetup2()
-    {
-        $this->requestStack->expects($this->once())->method('getCurrentRequest')->willReturn(true);
-        $this->formMock->method('isValid')->willReturn(true);
-        $this->handler->handleEditForm($this->formMock);
     }
 
     /**

@@ -26,7 +26,7 @@ class IssueHandler
         ActivityMailer $activityMailer
     ){
         $this->em = $entityManager;
-        $this->request = $requestStack->getCurrentRequest();
+        $this->requestStack = $requestStack;
         $this->helper = $helper;
         $this->activityMailer = $activityMailer;
     }
@@ -44,7 +44,7 @@ class IssueHandler
         $issue->setCode($project->getCode() . '-' . uniqid())
             ->setStatus($this->helper->getNewStatus());
 
-        $form->handleRequest($this->request);
+        $form->handleRequest($this->getRequest());
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
 
@@ -99,7 +99,7 @@ class IssueHandler
     {
         $issue = $this->getIssue($form);
 
-        $form->handleRequest($this->request);
+        $form->handleRequest($this->getRequest());
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
 
@@ -127,7 +127,7 @@ class IssueHandler
         $issue = $comment->getIssue();
         $author = $comment->getAuthor();
 
-        $form->handleRequest($this->request);
+        $form->handleRequest($this->getRequest());
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
 
@@ -170,7 +170,7 @@ class IssueHandler
         $comment = $this->getComment($form);
         $author = $comment->getAuthor();
 
-        $form->handleRequest($this->request);
+        $form->handleRequest($this->getRequest());
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
             $em->persist($comment);
@@ -194,7 +194,7 @@ class IssueHandler
     {
         $comment = $this->getComment($form);
 
-        $form->handleRequest($this->request);
+        $form->handleRequest($this->getRequest());
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->remove($comment);
             $this->em->flush();
@@ -282,5 +282,22 @@ class IssueHandler
         }
 
         return $comment;
+    }
+
+    /**
+     * @return null|\Symfony\Component\HttpFoundation\Request
+     * @throws \Exception
+     */
+    public function getRequest()
+    {
+        if (!$this->request) {
+            $request = $this->requestStack->getCurrentRequest();
+            if (!$request) {
+                throw new \Exception("No HTTP request has been initialized");
+            }
+            $this->request = $request;
+        }
+
+        return $this->request;
     }
 }
