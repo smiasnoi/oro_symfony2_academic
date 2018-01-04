@@ -140,7 +140,7 @@ class Issue
                 $allowedTypes = ['subtask', 'story_bug'];
                 break;
             default:
-                $allowedTypes = !$hasParent ? ['bug', 'task', 'story'] : [];
+                $allowedTypes = !$hasParent ? ['bug', 'task', 'story'] : ['subtask', 'story_bug'];
         }
 
         return $allowedTypes;

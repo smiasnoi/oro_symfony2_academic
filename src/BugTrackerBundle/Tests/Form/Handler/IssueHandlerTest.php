@@ -11,7 +11,7 @@ use BugTrackerBundle\Entity\Activity as ActivityEntity;
 use BugTrackerBundle\Entity\Comment as CommentEntity;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
-class UserHandlerTest extends TestCase
+class IssueHandlerTest extends TestCase
 {
     protected $handler;
     protected $emMock;
@@ -37,12 +37,16 @@ class UserHandlerTest extends TestCase
         $this->project = new ProjectEntity();
         $this->comment = new CommentEntity();
 
-        $issueHelperMock = $this->getMockBuilder('Symfony\Component\Form\FormInterface')
+        $issueHelperMock = $this->getMockBuilder('BugTrackerBundle\Helper\Issue')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $activityMailerMock = $this->getMockBuilder('BugTrackerBundle\Mailer\Activity')
             ->disableOriginalConstructor()
             ->getMock();
 
         $this->emMock->expects($this->any())->method('getRepository')->with('BugTrackerBundle:Issue')->willReturn($this->issueRepoMock);
-        $this->handler = new IssueHandler($this->emMock, $this->requestStack, $issueHelperMock, );
+        $this->handler = new IssueHandler($this->emMock, $this->requestStack, $issueHelperMock, $activityMailerMock);
     }
 
     /**

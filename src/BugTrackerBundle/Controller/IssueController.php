@@ -160,7 +160,7 @@ class IssueController extends Controller
         }
 
         return $this->render(
-            'BugTrackerBundle:issue:new_story.html.twig',
+            'BugTrackerBundle:issue:new.html.twig',
             ['form' => $form->createView(), 'story' => $story]
         );
     }
